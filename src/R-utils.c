@@ -1,5 +1,6 @@
 
 #include "R-utils.h"
+int DEBUG;
 
 SEXP rReadListElement(const SEXP list, const char *str) {
   SEXP elmt = R_NilValue;
