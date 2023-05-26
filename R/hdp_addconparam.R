@@ -20,7 +20,7 @@
 
 hdp_addconparam <- function(hdp, alphaa, alphab){
   #input checks
-  if (class(hdp) != "hdpState") stop("hdp must have class hdpState")
+  if (!is(hdp, "hdpState")) stop("hdp must have class hdpState")
   if (!validObject(hdp)) stop("input hdp is not a valid hdpState object")
   if (any(alphaa <= 0) | any(alphab <= 0)) {
     stop("alphaa and alphab must be positive")

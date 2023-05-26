@@ -24,7 +24,7 @@ plot_lik <- function(chain, start=1, end=length(lik(chain)),
                      xlab="Iteration", ylab="Likelihood", ...){
 
   # input checks
-  if (class(chain) != "hdpSampleChain") {
+  if (!is(chain, "hdpSampleChain")) {
     stop("chain must have class hdpSampleChain")
   }
   if (!validObject(chain)) stop("chain not a valid hdpSampleChain object")
@@ -49,7 +49,7 @@ plot_numcluster <- function(chain, col="blue", xlab="Sample",
                             ylab="Number of raw clusters", ...){
 
   # input checks
-  if (class(chain) != "hdpSampleChain") {
+  if (!is(chain, "hdpSampleChain")) {
     stop("chain must have class hdpSampleChain")
   }
   if (!validObject(chain)) stop("chain not a valid hdpSampleChain object")
@@ -73,11 +73,11 @@ plot_data_assigned <- function(chain, legend=TRUE, col_early="hotpink",
                                ylab="Cumulative prop. of data assigned", ...){
 
   # input checks
-  if (class(chain) != "hdpSampleChain") {
+  if (!is(chain, "hdpSampleChain")) {
     stop("chain must have class hdpSampleChain")
   }
   if (!validObject(chain)) stop("chain not a valid hdpSampleChain object")
-  if(class(legend) != "logical") stop("legend must be TRUE or FALSE")
+  if(!is.logical(legend)) stop("legend must be TRUE or FALSE")
 
 
   # extract necessary info

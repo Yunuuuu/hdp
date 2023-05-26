@@ -8,8 +8,8 @@
 
 hdp_multi_chain <- function(chain_list){
 
-  if (class(chain_list) != "list" |
-        any(sapply(chain_list, class) != "hdpSampleChain")) {
+  if (!is.list(chain_list) ||
+        any(sapply(chain_list, function(x) !is(x, "hdpSampleChain")))) {
     stop("chain_list must be a list of hdpSampleChain objects")
   }
 

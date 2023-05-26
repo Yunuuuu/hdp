@@ -30,7 +30,7 @@
 hdp_adddp <- function(hdp, numdp, ppindex, cpindex){
 
   # input checks
-  if (class(hdp) != "hdpState") stop("hdp must have class hdpState")
+  if (!is(hdp, "hdpState")) stop("hdp must have class hdpState")
   if (!validObject(hdp)) stop("input hdp is not a valid hdpState object")
   if (numdp < 1 | numdp %% 1 != 0) stop("numdp must be positive integer")
   # adjust length of ppindex and cpindex if single integer

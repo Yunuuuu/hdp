@@ -7,21 +7,29 @@
 #' @importFrom grDevices colorRampPalette
 #' @examples
 #' mut_example_multi <- hdp_extract_components(mut_example_multi)
-#' plot_comp_size(mut_example_multi, bty="L")
+#' plot_comp_size(mut_example_multi, bty = "L")
 #' bases <- c("A", "C", "G", "T")
-#' trinuc_context <- paste0(rep(rep(bases, times=6), each=4),
-#'                          rep(c("C", "T"), each=48),
-#'                          rep(bases, times=24))
+#' trinuc_context <- paste0(
+#'   rep(rep(bases, times = 6), each = 4),
+#'   rep(c("C", "T"), each = 48),
+#'   rep(bases, times = 24)
+#' )
 #' group_factor <- as.factor(rep(c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G"),
-#'                            each=16))
-#' plot_comp_distn(mut_example_multi, cat_names=trinuc_context,
-#'                 grouping=group_factor, col=RColorBrewer::brewer.pal(6, "Set2"),
-#'                 col_nonsig="grey80", show_group_labels=TRUE)
+#'   each = 16
+#' ))
+#' plot_comp_distn(mut_example_multi,
+#'   cat_names = trinuc_context,
+#'   grouping = group_factor, col = RColorBrewer::brewer.pal(6, "Set2"),
+#'   col_nonsig = "grey80", show_group_labels = TRUE
+#' )
+#' plot_dp_comp_exposure(
+#'   mut_example_multi, 5:30,
+#'   RColorBrewer::brewer.pal(12, "Set3")
+#' )
 #' plot_dp_comp_exposure(mut_example_multi, 5:30,
-#'                       RColorBrewer::brewer.pal(12, "Set3"))
-#' plot_dp_comp_exposure(mut_example_multi, 5:30,
-#'                       RColorBrewer::brewer.pal(12, "Set3"),
-#'                       incl_numdata_plot=FALSE, incl_nonsig=FALSE)
+#'   RColorBrewer::brewer.pal(12, "Set3"),
+#'   incl_numdata_plot = FALSE, incl_nonsig = FALSE
+#' )
 NULL
 #> NULL
 
@@ -34,43 +42,44 @@ NULL
 #' @param ... Other arguments to plot
 #' @export
 #' @rdname plotcomp
-plot_comp_size <- function(hdpsample, legend=TRUE, col_a="hotpink",
-                           col_b="skyblue3", xlab="Component",
-                           ylab="Number of data items", ...){
-
+plot_comp_size <- function(hdpsample, legend = TRUE, col_a = "hotpink",
+                           col_b = "skyblue3", xlab = "Component",
+                           ylab = "Number of data items", ...) {
   # input checks
-  if (!class(hdpsample) %in% c("hdpSampleChain", "hdpSampleMulti")) {
+  if (!(is(hdpsample, "hdpSampleChain") || is(hdpsample, "hdpSampleMulti"))) {
     stop("hdpsample must have class hdpSampleChain or hdpSampleMulti")
   }
   # if (!validObject(hdpsample)) stop("hdpsample not valid") # too slow on big objects
   if (length(comp_categ_counts(hdpsample)) == 0) {
     stop("No component info for hdpsample. First run hdp_extract_components")
   }
-  if(class(legend) != "logical") stop("legend must be TRUE or FALSE")
+  if (!(is.logical(legend) && length(legend) == 1L)) stop("legend must be TRUE or FALSE")
 
 
   sums <- t(sapply(comp_categ_counts(hdpsample), rowSums))
 
   # colour ramp across posterior samples
-  cols <- colorRampPalette(colors=c(col_a, col_b))
+  cols <- colorRampPalette(colors = c(col_a, col_b))
 
   # colour vector
 
-  if (class(hdpsample) == "hdpSampleChain") {
+  if (is(hdpsample, "hdpSampleChain")) {
     mycols <- cols(ncol(sums))
     legtext <- c("Early samples", "Late samples")
-  } else if (class(hdpsample) == "hdpSampleMulti") {
+  } else if (is(hdpsample, "hdpSampleMulti")) {
     postsamps <- sapply(chains(hdpsample), function(x) length(numcluster(x)))
     mycols <- rep(cols(length(postsamps)), postsamps)
     legtext <- c("First chain", "Last chain")
   }
 
-  plot(x=jitter(rep(0:(nrow(sums)-1), ncol(sums))), xlab=xlab, xaxt="n",
-       y=as.vector(sums), pch=1, col=mycols, ylab=ylab, ...)
-  axis(1, at=0:(nrow(sums)-1), labels=rownames(sums))
+  plot(
+    x = jitter(rep(0:(nrow(sums) - 1), ncol(sums))), xlab = xlab, xaxt = "n",
+    y = as.vector(sums), pch = 1, col = mycols, ylab = ylab, ...
+  )
+  axis(1, at = 0:(nrow(sums) - 1), labels = rownames(sums))
 
   if (legend) {
-    legend("topright", col=c(col_a, col_b), pch=1, legend=legtext, bty="n")
+    legend("topright", col = c(col_a, col_b), pch = 1, legend = legtext, bty = "n")
   }
 }
 
@@ -92,14 +101,13 @@ plot_comp_size <- function(hdpsample, legend=TRUE, col_a="hotpink",
 #' @param cex.cat Expansion factor for the (optional) cat_names
 #' @export
 #' @rdname plotcomp
-plot_comp_distn <- function(hdpsample, comp=NULL, cat_names=NULL,
-                            grouping=NULL, col="grey70", col_nonsig=NULL,
-                            show_group_labels=FALSE, cred_int=TRUE,
-                            weights=NULL, plot_title=NULL,
-                            group_label_height=1.05, cex.cat=0.7, ...){
-
+plot_comp_distn <- function(hdpsample, comp = NULL, cat_names = NULL,
+                            grouping = NULL, col = "grey70", col_nonsig = NULL,
+                            show_group_labels = FALSE, cred_int = TRUE,
+                            weights = NULL, plot_title = NULL,
+                            group_label_height = 1.05, cex.cat = 0.7, ...) {
   # input checks
-  if (!class(hdpsample) %in% c("hdpSampleChain", "hdpSampleMulti")) {
+  if (!(is(hdpsample, "hdpSampleChain") || is(hdpsample, "hdpSampleMulti"))) {
     stop("hdpsample must have class hdpSampleChain or hdpSampleMulti")
   }
   # if (!validObject(hdpsample)) stop("hdpsample not valid") # too slow on big objects
@@ -107,79 +115,74 @@ plot_comp_distn <- function(hdpsample, comp=NULL, cat_names=NULL,
     stop("No component info for hdpsample. First run hdp_extract_components")
   }
 
-  if (class(hdpsample) == "hdpSampleChain") {
+  if (is(hdpsample, "hdpSampleChain")) {
     ncat <- numcateg(final_hdpState(hdpsample))
-  } else if (class(hdpsample) == "hdpSampleMulti") {
+  } else if (is(hdpsample, "hdpSampleMulti")) {
     ncat <- numcateg(final_hdpState(chains(hdpsample)[[1]]))
   }
 
   comp_distn <- comp_categ_distn(hdpsample)
-  ncomp <- nrow(comp_distn$mean)-1
-  if (class(comp) != "NULL") {
-    if ( !is.numeric(comp) | any(comp %% 1 != 0) |
-          any(comp < 0) | any(comp > ncomp)) {
+  ncomp <- nrow(comp_distn$mean) - 1
+  if (!is.null(comp)) {
+    if (!is.numeric(comp) || any(comp %% 1L != 0L) ||
+      any(comp < 0L) || any(comp > ncomp)) {
       stop(paste("comp must be integer between 0 and", ncomp))
     }
   }
-  if (!class(cat_names) %in% c("character", "NULL") |
-       !length(cat_names) %in% c(ncat, 0)) {
+  if (!(is.character(cat_names) || is.null(cat_names)) || !any(length(cat_names) == c(ncat, 0L))) {
     stop("cat_names must be a character vector with one value for every
          data category, or NULL")
   }
-  if (!class(grouping) %in% c("factor", "NULL") |
-        !length(grouping) %in% c(ncat, 0)) {
+  if (!(is.factor(grouping) || is.null(grouping)) || !any(length(grouping) == c(ncat, 0L))) {
     stop("grouping must be a factor with one value for every
          data category, or NULL")
   }
-  if(class(show_group_labels) != "logical") {
+  if (!is.logical(show_group_labels)) {
     stop("show_group_labels must be TRUE or FALSE")
   }
-  if(class(cred_int) != "logical") stop("cred_int must be TRUE or FALSE")
-  if(!class(weights) %in% c("numeric", "NULL") |
-       !length(weights) %in% c(ncat, 0)) {
+  if (!is.logical(cred_int)) stop("cred_int must be TRUE or FALSE")
+  if (!(is.numeric(weights) || is.null(weights)) || !any(length(weights) == c(ncat, 0L))) {
     stop("weights must be a numeric vector with one value for every
          data category, or NULL")
   }
 
   # which components to plot
-  if (is.null(comp)){
+  if (is.null(comp)) {
     comp_to_plot <- rownames(comp_distn$mean)
   } else {
-    comp_to_plot <- rownames(comp_distn$mean)[comp+1]
+    comp_to_plot <- rownames(comp_distn$mean)[comp + 1]
   }
 
-  if(!class(plot_title) %in% c("character", "NULL") |
-       !length(plot_title) %in% c(length(comp_to_plot), 0)){
+  if (!(is.character(plot_title) || is.null(plot_title)) || !any(length(plot_title) == c(ncat, 0L))) {
     stop("plot_title must be a character vector with one value for every
          component being plotted, or NULL")
   }
 
   # colours for each category
-  if (is.null(grouping)){
+  if (is.null(grouping)) {
     cat_cols <- rep(col, ncat)
   } else {
     cat_cols <- col[grouping]
   }
 
   # main titles
-  if (is.null(plot_title)){
+  if (is.null(plot_title)) {
     plot_title <- paste("Component", comp_to_plot)
   }
   names(plot_title) <- comp_to_plot
 
-  for (ii in seq_along(comp_to_plot)){
-
+  for (ii in seq_along(comp_to_plot)) {
     cname <- comp_to_plot[ii]
 
     # mean categorical distribution (sig), and credibility interval
-    sig <- comp_distn$mean[cname,]
+    sig <- comp_distn$mean[cname, ]
     ci <- comp_distn$cred.int[[cname]]
 
     # adjust categories by weights if specified (lose cred intervals though)
-    if(!is.null(weights)){
+    if (!is.null(weights)) {
       sig <- sig %*% diag(weights)
       denom <- sum(sig)
-      sig <- sig/denom
+      sig <- sig / denom
       ci <- NULL # not sure how to get cred int if adjusting with weights
     }
 
@@ -187,43 +190,51 @@ plot_comp_distn <- function(hdpsample, comp=NULL, cat_names=NULL,
 
     # set categories whose credibility intervals hit zero to a different colour
     cat_cols_copy <- cat_cols
-    if (!is.null(col_nonsig)){
-      cat_cols_copy[which(ci[1,]==0)] <- col_nonsig
+    if (!is.null(col_nonsig)) {
+      cat_cols_copy[which(ci[1, ] == 0)] <- col_nonsig
     }
 
     # max plotting height
-    plottop <- ceiling(max(ci)/0.1)*0.1
+    plottop <- ceiling(max(ci) / 0.1) * 0.1
 
     # main barplot
-    b <- barplot(sig, col=cat_cols_copy, xaxt="n", ylim=c(0,plottop*1.1),
-                 border=NA, names.arg=rep("", ncat), xpd=F, las=1,
-                 main=plot_title[ii], ...)
+    b <- barplot(sig,
+      col = cat_cols_copy, xaxt = "n", ylim = c(0, plottop * 1.1),
+      border = NA, names.arg = rep("", ncat), xpd = F, las = 1,
+      main = plot_title[ii], ...
+    )
 
     # add credibility intervals
-    if (cred_int & !is.null(ci)){
-      segments(x0=b, y0=ci[1,], y1=ci[2,], col="grey30")
+    if (cred_int && !is.null(ci)) {
+      segments(x0 = b, y0 = ci[1, ], y1 = ci[2, ], col = "grey30")
     }
 
     # add category names
-    if (!is.null(cat_names)){
-      mtext(cat_names, side=1, las=2, at=b, cex=cex.cat,
-            family="mono", col=cat_cols)
+    if (!is.null(cat_names)) {
+      mtext(cat_names,
+        side = 1, las = 2, at = b, cex = cex.cat,
+        family = "mono", col = cat_cols
+      )
     }
 
     # add group labels
-    if(show_group_labels){
+    if (show_group_labels) {
       gl <- rle(as.vector(grouping))
 
       glends <- cumsum(gl$lengths)
-      glstarts <- c(1, glends[-length(glends)]+1)
+      glstarts <- c(1, glends[-length(glends)] + 1)
       glcol <- col[as.factor(gl$values)]
 
       bd <- mean(diff(b))
-      segments(x0=b[glstarts]-bd, x1=b[glends]+bd,
-               y0=plottop, col=glcol, lwd=9, lend=1)
+      segments(
+        x0 = b[glstarts] - bd, x1 = b[glends] + bd,
+        y0 = plottop, col = glcol, lwd = 9, lend = 1
+      )
 
-      text(b[floor(glends/2 + glstarts/2)], y=plottop*group_label_height,
-           labels=gl$values)
+      text(b[floor(glends / 2 + glstarts / 2)],
+        y = plottop * group_label_height,
+        labels = gl$values
+      )
     }
   }
 }
@@ -247,17 +258,16 @@ plot_comp_distn <- function(hdpsample, comp=NULL, cat_names=NULL,
 #' @param oma See ?par
 #' @export
 #' @rdname plotcomp
-plot_dp_comp_exposure <- function(hdpsample, dpindices, col_comp, dpnames=NULL,
-                                main_text=NULL, incl_numdata_plot=TRUE,
-                                incl_nonsig=TRUE, incl_comp0=TRUE,
-                                ylab_numdata="Number of data items",
-                                ylab_exp="Component exposure",
-                                leg.title="Component", cex.names=0.6,
-                                cex.axis=0.7, mar=c(1, 4, 2, 0.5),
-                                oma=c(1.5, 1.5, 1, 1), ...){
-
+plot_dp_comp_exposure <- function(hdpsample, dpindices, col_comp, dpnames = NULL,
+                                  main_text = NULL, incl_numdata_plot = TRUE,
+                                  incl_nonsig = TRUE, incl_comp0 = TRUE,
+                                  ylab_numdata = "Number of data items",
+                                  ylab_exp = "Component exposure",
+                                  leg.title = "Component", cex.names = 0.6,
+                                  cex.axis = 0.7, mar = c(1, 4, 2, 0.5),
+                                  oma = c(1.5, 1.5, 1, 1), ...) {
   # input checks
-  if (!class(hdpsample) %in% c("hdpSampleChain", "hdpSampleMulti")) {
+  if (!(is(hdpsample, "hdpSampleChain") || is(hdpsample, "hdpSampleMulti"))) {
     stop("hdpsample must have class hdpSampleChain or hdpSampleMulti")
   }
   # if (!validObject(hdpsample)) stop("hdpsample not valid") # too slow on big objects
@@ -267,46 +277,45 @@ plot_dp_comp_exposure <- function(hdpsample, dpindices, col_comp, dpnames=NULL,
   dp_distn <- comp_dp_distn(hdpsample)
   ndp <- nrow(dp_distn$mean)
   ncomp <- ncol(dp_distn$mean)
-  if (!is.numeric(dpindices) | any(dpindices %% 1 != 0) |
-        any(dpindices < 1) | any(dpindices > ndp)) {
+  if (!is.numeric(dpindices) || any(dpindices %% 1L != 0L) ||
+    any(dpindices < 1L) || any(dpindices > ndp)) {
     stop(paste("dpindices must be integers between 1 and", ndp))
   }
   if (!length(col_comp) >= ncomp) {
     stop(paste("col_comp must specify at least", ncomp, "colours"))
   }
-  if (!class(dpnames) %in% c("character", "NULL") |
-        !length(dpnames) %in% c(length(dpindices), 0)) {
+  if (!(is.character(dpnames) || is.null(dpnames)) || !any(length(dpnames) == c(length(dpindices), 0L))) {
     stop("dpnames must be a character vector with
          same length as dpindices, or NULL")
   }
-  if (!class(main_text) %in% c("character", "NULL") |
-        !length(main_text) %in% c(1, 0)) {
+  if (!(is.character(main_text) || is.null(main_text)) ||
+    !any(length(main_text) == c(1L, 0L))) {
     stop("main_text must be a character string, or NULL")
   }
-  if(class(incl_numdata_plot) != "logical") {
+  if (!is.logical(incl_numdata_plot)) {
     stop("incl_numdata_plot must be TRUE or FALSE")
   }
-  if(class(incl_nonsig) != "logical") stop("incl_nonsig must be TRUE or FALSE")
+  if (!is.logical(incl_nonsig)) stop("incl_nonsig must be TRUE or FALSE")
 
 
   # save pre-existing par conditions, and reset on exit
-  par_old <- par(no.readonly=TRUE)
-  on.exit(par(par_old), add=TRUE)
+  par_old <- par(no.readonly = TRUE)
+  on.exit(par(par_old), add = TRUE)
 
   # Number of data items per DP
-  if (class(hdpsample) == "hdpSampleChain") {
+  if (is(hdpsample, "hdpSampleChain")) {
     dps <- dp(final_hdpState(hdpsample))[dpindices]
     pps <- ppindex(final_hdpState(hdpsample))[dpindices]
-  } else if (class(hdpsample) == "hdpSampleMulti") {
+  } else if (is(hdpsample, "hdpSampleMulti")) {
     dps <- dp(final_hdpState(chains(hdpsample)[[1]]))[dpindices]
     pps <- ppindex(final_hdpState(chains(hdpsample)[[1]]))[dpindices]
   }
 
   numdata <- sapply(dps, function(x) x@numdata)
-  dp_order <- order(numdata, decreasing=TRUE)
+  dp_order <- order(numdata, decreasing = TRUE)
 
   # if incl_numdata_plot TRUE, throw error if one DP has no data associated
-  if (incl_numdata_plot & any(numdata == 0)) {
+  if (incl_numdata_plot && any(numdata == 0L)) {
     stop("Can't have incl_numdata_plot TRUE if
          one or more dpindices have no associated data item/s")
   }
@@ -318,7 +327,7 @@ plot_dp_comp_exposure <- function(hdpsample, dpindices, col_comp, dpnames=NULL,
   }
 
   # mean exposures
-  exposures <- t(dp_distn$mean[dpindices,,drop=FALSE])
+  exposures <- t(dp_distn$mean[dpindices, , drop = FALSE])
   # think I don't need this anymore with drop=FALSE above?
   # if (nrow(exposures)==1) {
   #   dim(exposures) <- rev(dim(exposures))
@@ -326,49 +335,57 @@ plot_dp_comp_exposure <- function(hdpsample, dpindices, col_comp, dpnames=NULL,
   #   }
 
   # only include significantly non-zero exposures
-  if (!incl_nonsig){
+  if (!incl_nonsig) {
     cis <- dp_distn$cred.int[dpindices]
-    nonsig <- lapply(cis, function(x) which(x[1,]==0))
-    for (i in 1:length(nonsig)){
-      exposures[nonsig[[i]],i] <- 0
+    nonsig <- lapply(cis, function(x) which(x[1, ] == 0))
+    for (i in seq_along(nonsig)) {
+      exposures[nonsig[[i]], i] <- 0
     }
   }
 
   # exclude signature 0
-  if (!incl_comp0){
-    exposures <- exposures[-1,]
+  if (!incl_comp0) {
+    exposures <- exposures[-1, ]
   }
 
   # which components to include in this plot
-  inc <- which(rowSums(exposures, na.rm=T)>0)
+  inc <- which(rowSums(exposures, na.rm = TRUE) > 0)
 
   num_leg_col <- floor(sqrt(length(inc)))
 
-  if (incl_numdata_plot){
-    par(mfrow=c(2, 1), mar=mar, oma=oma, cex.axis=cex.axis, las=1)
+  if (incl_numdata_plot) {
+    par(mfrow = c(2, 1), mar = mar, oma = oma, cex.axis = cex.axis, las = 1)
 
-    barplot(numdata[dp_order], main=main_text, col="gray", space=0, border=NA,
-            names.arg="", ylab=ylab_numdata,
-            legend.text=names(inc),
-            args.legend=list(fill=col_comp[inc], bty="n", title=leg.title,
-                             ncol=num_leg_col), ...)
+    barplot(numdata[dp_order],
+      main = main_text, col = "gray", space = 0, border = NA,
+      names.arg = "", ylab = ylab_numdata,
+      legend.text = names(inc),
+      args.legend = list(
+        fill = col_comp[inc], bty = "n", title = leg.title,
+        ncol = num_leg_col
+      ), ...
+    )
 
-    barplot(as.matrix(exposures[inc, dp_order, drop=FALSE]), space=0, col=col_comp[inc], border=NA,
-            ylim=c(0, 1), names.arg=dpnames[dp_order], ylab=ylab_exp,
-            cex.names=cex.names, ...)
+    barplot(as.matrix(exposures[inc, dp_order, drop = FALSE]),
+      space = 0, col = col_comp[inc], border = NA,
+      ylim = c(0, 1), names.arg = dpnames[dp_order], ylab = ylab_exp,
+      cex.names = cex.names, ...
+    )
   } else {
-
-    par(cex.axis=cex.axis, las=2)
+    par(cex.axis = cex.axis, las = 2)
     # don't understand why legend.text needs rev() here and not in above case,
     # but seems to work?
-    barplot(as.matrix(exposures[inc, dp_order, drop=FALSE]), space=0, col=col_comp[inc],
-            border=NA, ylim=c(0, 1),
-            xlim=c(0, length(dpindices) + num_leg_col + 1),
-            names.arg=dpnames[dp_order],
-            ylab=ylab_exp, cex.names=cex.names,
-            legend.text=rev(names(inc)),
-            args.legend=list(fill=col_comp[inc], bty="n", title=leg.title,
-                             ncol=num_leg_col), ...)
+    barplot(as.matrix(exposures[inc, dp_order, drop = FALSE]),
+      space = 0, col = col_comp[inc],
+      border = NA, ylim = c(0, 1),
+      xlim = c(0, length(dpindices) + num_leg_col + 1),
+      names.arg = dpnames[dp_order],
+      ylab = ylab_exp, cex.names = cex.names,
+      legend.text = rev(names(inc)),
+      args.legend = list(
+        fill = col_comp[inc], bty = "n", title = leg.title,
+        ncol = num_leg_col
+      ), ...
+    )
   }
-
 }

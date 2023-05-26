@@ -36,7 +36,7 @@ hdp_posterior <- function(hdp, burnin, n, space, cpiter=1,
                           seed=sample(1:10^7, 1), verbosity=0){
 
   # input checks
-  if (class(hdp) != "hdpState") stop("hdp must have class hdpState")
+  if (!is(hdp, "hdpState")) stop("hdp must have class hdpState")
   if (!validObject(hdp)) stop("input hdp is not a valid hdpState object")
   for (arg in c("burnin", "n", "space", "cpiter")) {
     x <- get(arg)

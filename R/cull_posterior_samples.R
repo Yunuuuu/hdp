@@ -24,17 +24,17 @@
 cull_posterior_samples <- function(chain, ncull){
 
   # input checks
-  if (class(chain) != "hdpSampleChain") {
+  if (!is(chain, "hdpSampleChain")) {
     stop("chain must have class hdpSampleChain")
   }
   if (!validObject(chain)) stop("chain not a valid hdpSampleChain object")
-  if (ncull < 1 | ncull >= hdp_settings(chain)$n |
-        ncull %% 1 != 0) {
+  if (ncull < 1 || ncull >= hdp_settings(chain)$n ||
+        ncull %% 1L != 0L) {
     stop("ncull must be positive integer less than number of samples in chain")
   }
 
   # if component slot exist, clear them
-  if (length(comp_categ_counts(chain)) > 0 ){
+  if (length(comp_categ_counts(chain)) > 0L ){
     message("Deleting component calculations. Re-run hdp_extract_components")
     numcomp <- as.integer(NULL)
     prop.ex <- as.numeric(NULL)

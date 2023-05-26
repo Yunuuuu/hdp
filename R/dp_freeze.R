@@ -16,7 +16,7 @@
 dp_freeze <- function(hdp, dpindex){
 
   # input checks
-  if (class(hdp) != "hdpState") stop("hdp must have class hdpState")
+  if (!is(hdp, "hdpState")) stop("hdp must have class hdpState")
   if (!validObject(hdp)) stop("input hdp is not a valid hdpState object")
   if (any(dpindex < 1) |
         any(dpindex > hdp@numdp) |

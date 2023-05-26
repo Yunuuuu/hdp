@@ -25,17 +25,17 @@
 hdp_quick_init <- function(data, initcc=2, alphaa=1, alphab=1){
 
   # input checks
-  if (!class(data) %in% c("matrix", "data.frame")) {
+  if (!(is.matrix(data) || inherits(data, "data.frame"))) {
     stop("data must be data.frame or matrix")
   }
-  if (any(data %% 1 != 0) | any(data < 0)) {
+  if (any(data %% 1L != 0L) || any(data < 0L)) {
     stop("data must contain non-negative integer values")
   }
-  if (initcc < 1 | initcc %% 1 != 0) stop("initcc must be a positive integer")
-  if (alphaa <= 0 | alphab <= 0) {
+  if (initcc < 1L || initcc %% 1L != 0L) stop("initcc must be a positive integer")
+  if (alphaa <= 0L || alphab <= 0L) {
     stop("alphaa and alphab must be positive")
   }
-  if (length(alphaa) != 1 | length(alphab) != 1) {
+  if (length(alphaa) != 1L || length(alphab) != 1L) {
     stop("alphaa and alphab must have length 1")
   }
 
