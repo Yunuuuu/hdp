@@ -45,7 +45,7 @@ hdp_adddp <- function(hdp, numdp, ppindex, cpindex) {
         all(x < (hdp@numdp + 1L):(hdp@numdp + numdp))
     },
     msg = sprintf(
-      "positive integer (length {.val 1L} or {.arg numdp} ({.val %d}) ) referring to a parent of smaller index", # nolint
+      "positive integer (length {.val {1L}} or {.arg numdp} ({.val {%d}}) ) referring to a parent of smaller index", # nolint
       numdp
     )
   )
