@@ -13,32 +13,31 @@
 #' @seealso \code{\link{hdp_init}}, \code{\link{hdp_addconparam}}, \code{\link{hdp_adddp}},
 #'  \code{\link{hdp_setdata}}, \code{\link{dp_activate}}, \code{\link{hdp_posterior}}
 #' @export
-dp_freeze <- function(hdp, dpindex){
-
+dp_freeze <- function(hdp, dpindex) {
   # input checks
   if (!is(hdp, "hdpState")) stop("hdp must have class hdpState")
   if (!validObject(hdp)) stop("input hdp is not a valid hdpState object")
   if (any(dpindex < 1) |
-        any(dpindex > hdp@numdp) |
-        any(dpindex %% 1 != 0) |
-        any(duplicated(dpindex))) {
+    any(dpindex > hdp@numdp) |
+    any(dpindex %% 1 != 0) |
+    any(duplicated(dpindex))) {
     stop("dpindex must be positive integers no greater than
          numdp(hdp) with no duplicates")
   }
 
-  ACTIVE  <- 2L
-  FROZEN  <- 1L
+  ACTIVE <- 2L
+  FROZEN <- 1L
 
   dpindex <- sort(dpindex)
 
-  for (kk in 1:length(dpindex)){
+  for (kk in 1:length(dpindex)) {
     jj <- dpindex[kk]
-    if (hdp@dpstate[jj] != ACTIVE){
+    if (hdp@dpstate[jj] != ACTIVE) {
       stop("Can only freeze a DP that is activated")
     }
 
     hdp@dp[[jj]]@alpha <- numeric(0)
-    hdp@dpstate[jj]  <- FROZEN
+    hdp@dpstate[jj] <- FROZEN
   }
 
   # check validity and return

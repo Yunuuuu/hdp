@@ -21,9 +21,7 @@
 #' @examples
 #' my_quick_hdp <- hdp_quick_init(example_data_hdp)
 #' my_quick_hdp_chain <- hdp_posterior(my_quick_hdp, 100, 50, 10, 5)
-
-hdp_quick_init <- function(data, initcc=2, alphaa=1, alphab=1){
-
+hdp_quick_init <- function(data, initcc = 2, alphaa = 1, alphab = 1) {
   # input checks
   if (!(is.matrix(data) || inherits(data, "data.frame"))) {
     stop("data must be data.frame or matrix")

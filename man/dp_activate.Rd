@@ -29,7 +29,7 @@ When initialised, the DP nodes are 'heldout' (not available for posterior sampli
 Note that this step can be slow and memory-intensive for very large datasets.
 }
 \examples{
-my_hdp <- hdp_init(ppindex=0, cpindex=1, hh=rep(1, 6), alphaa=rep(1, 3), alphab=rep(2, 3))
+my_hdp <- hdp_init(ppindex = 0, cpindex = 1, hh = rep(1, 6), alphaa = rep(1, 3), alphab = rep(2, 3))
 my_hdp <- hdp_adddp(my_hdp, 2, 1, 2)
 my_hdp <- hdp_adddp(my_hdp, 10, c(rep(2, 5), rep(3, 5)), 3)
 my_hdp <- hdp_setdata(my_hdp, 4:13, example_data_hdp)

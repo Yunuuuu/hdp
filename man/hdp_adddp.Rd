@@ -27,10 +27,11 @@ and will need to be activated (see \code{\link{dp_activate}}). Finally, the post
 sampling process (a Gibbs sampler) is run via \code{\link{hdp_posterior}}.
 }
 \examples{
-my_hdp <- hdp_init(ppindex=0, cpindex=1, hh=rep(1, 6), alphaa=rep(1, 3), alphab=rep(2, 3))
+my_hdp <- hdp_init(ppindex = 0, cpindex = 1, hh = rep(1, 6), alphaa = rep(1, 3), alphab = rep(2, 3))
 # add two more DPs with parent '1' and concentration parameter '2'
 my_hdp <- hdp_adddp(my_hdp, 2, 1, 2)
 my_hdp
+#
 hdp_example <- hdp_init(c(0, 1, 1), c(1, 2, 2), rep(1, 6), rep(2, 2), rep(0.5, 2))
 # add six more DPs, three with parent '2', three with parent '3',
 # and all with concentration parameter '2'

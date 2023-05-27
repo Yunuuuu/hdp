@@ -15,29 +15,27 @@
 #' @export
 #' @examples
 #' example_data_hdp
-#' my_hdp <- hdp_init(ppindex=0, cpindex=1, hh=rep(1, 6), alphaa=rep(1, 3), alphab=rep(2, 3))
+#' my_hdp <- hdp_init(ppindex = 0, cpindex = 1, hh = rep(1, 6), alphaa = rep(1, 3), alphab = rep(2, 3))
 #' my_hdp <- hdp_adddp(my_hdp, 2, 1, 2)
 #' my_hdp <- hdp_adddp(my_hdp, 10, c(rep(2, 5), rep(3, 5)), 3)
 #' my_hdp <- hdp_setdata(my_hdp, 4:13, example_data_hdp)
 #' dp(my_hdp)
-
-hdp_setdata <- function(hdp, dpindex, data){
-
-  #input checks
+hdp_setdata <- function(hdp, dpindex, data) {
+  # input checks
   if (!is(hdp, "hdpState")) stop("hdp must have class hdpState")
   if (!validObject(hdp)) stop("input hdp is not a valid hdpState object")
   if (any(dpindex < 1) |
-        any(dpindex > hdp@numdp) |
-        any(dpindex %% 1 != 0) |
-        any(duplicated(dpindex))) {
+    any(dpindex > hdp@numdp) |
+    any(dpindex %% 1 != 0) |
+    any(duplicated(dpindex))) {
     stop("dpindex must be positive integers no greater than
          numdp(hdp) with no duplicates")
   }
   if (!(is.matrix(data) || inherits(data, "data.frame"))) {
     stop("data must be data.frame or matrix")
   }
-  if (nrow(data)!=length(dpindex)) stop("nrow(data) must equal length(dpindex)")
-  if (ncol(data)!=numcateg(hdp)) stop("ncol(data) must equal numcateg(hdp)")
+  if (nrow(data) != length(dpindex)) stop("nrow(data) must equal length(dpindex)")
+  if (ncol(data) != numcateg(hdp)) stop("ncol(data) must equal numcateg(hdp)")
   if (any(data %% 1 != 0) | any(data < 0)) {
     stop("data must contain non-negative integer values")
   }
@@ -49,12 +47,12 @@ hdp_setdata <- function(hdp, dpindex, data){
   HELDOUT <- 0L
 
   # assign data to specified DP
-  for (jj in 1:length(dpindex)){
-    if (hdp@dpstate[dpindex[jj]] != HELDOUT){
+  for (jj in 1:length(dpindex)) {
+    if (hdp@dpstate[dpindex[jj]] != HELDOUT) {
       stop("Cannot set data for DPs that are not held out")
     }
     hdp@dp[[dpindex[jj]]]@numdata <- length(datass[[jj]])
-    hdp@dp[[dpindex[jj]]]@datass  <- datass[[jj]]
+    hdp@dp[[dpindex[jj]]]@datass <- datass[[jj]]
   }
 
   # check validity and return

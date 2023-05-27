@@ -32,17 +32,19 @@ from posterior sampling).
 \examples{
 # example dataset with 10 data categories, and 100 samples.
 # Two components are known a priori.
-hdp <- hdp_prior_init(example_known_priors, rep(1000, 2), hh=rep(1, 10),
-             alphaa=c(1,1), alphab=c(1,1))
-hdp <- hdp_addconparam(hdp, alphaa=c(1,1), alphab=c(1,1))
+hdp <- hdp_prior_init(example_known_priors, rep(1000, 2),
+  hh = rep(1, 10),
+  alphaa = c(1, 1), alphab = c(1, 1)
+)
+hdp <- hdp_addconparam(hdp, alphaa = c(1, 1), alphab = c(1, 1))
 hdp <- hdp_adddp(hdp, 101, c(1, rep(4, 100)), c(3, rep(4, 100)))
 hdp <- hdp_setdata(hdp, 5:104, example_data_hdp_prior)
-hdp <- dp_activate(hdp, 4:104, initcc=4, seed=81479)
-hdp <- hdp_posterior(hdp, burnin=2000, n=50, space=50, cpiter=3, seed=1e6)
+hdp <- dp_activate(hdp, 4:104, initcc = 4, seed = 81479)
+hdp <- hdp_posterior(hdp, burnin = 2000, n = 50, space = 50, cpiter = 3, seed = 1e6)
 hdp_ex <- hdp_extract_components(hdp)
 plot_comp_size(hdp_ex)
 plot_comp_distn(hdp_ex)
-plot_dp_comp_exposure(hdp_ex, 5:104, col_comp=rainbow(5))
+plot_dp_comp_exposure(hdp_ex, 5:104, col_comp = rainbow(5))
 }
 \seealso{
 \code{\link{hdp_init}}

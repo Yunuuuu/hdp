@@ -2,3 +2,5 @@
 ^\.Rproj\.user$
 ^data-raw$
 ^\.travis\.yml$
+^\.radian_hitory$
+^Scratch\.RConsole$

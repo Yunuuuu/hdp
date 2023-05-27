@@ -2,7 +2,7 @@
 #' @importFrom stats rbeta runif
 NULL
 
-.onUnload <- function(libpath){
+.onUnload <- function(libpath) {
   library.dynam.unload("hdp", libpath)
 }
 

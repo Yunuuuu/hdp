@@ -26,15 +26,14 @@
 #' @importClassesFrom Matrix dgCMatrix
 #' @export
 #' @examples
-#' my_hdp <- hdp_init(ppindex=0, cpindex=1, hh=rep(1, 6), alphaa=rep(1, 3), alphab=rep(2, 3))
+#' my_hdp <- hdp_init(ppindex = 0, cpindex = 1, hh = rep(1, 6), alphaa = rep(1, 3), alphab = rep(2, 3))
 #' my_hdp <- hdp_adddp(my_hdp, 2, 1, 2)
 #' my_hdp <- hdp_adddp(my_hdp, 10, c(rep(2, 5), rep(3, 5)), 3)
 #' my_hdp <- hdp_setdata(my_hdp, 4:13, example_data_hdp)
 #' my_hdp <- dp_activate(my_hdp, 1:13, 2)
 #' my_hdp_chain <- hdp_posterior(my_hdp, 100, 100, 10)
-hdp_posterior <- function(hdp, burnin, n, space, cpiter=1,
-                          seed=sample(1:10^7, 1), verbosity=0){
-
+hdp_posterior <- function(hdp, burnin, n, space, cpiter = 1,
+                          seed = sample(1:10^7, 1), verbosity = 0) {
   # input checks
   if (!is(hdp, "hdpState")) stop("hdp must have class hdpState")
   if (!validObject(hdp)) stop("input hdp is not a valid hdpState object")
@@ -43,23 +42,25 @@ hdp_posterior <- function(hdp, burnin, n, space, cpiter=1,
     if (x < 1 | x %% 1 != 0) stop(paste(arg, "must be a positive integer"))
   }
   if (verbosity < 0 |
-        verbosity > 4 |
-        verbosity %% 1 != 0) stop("verbosity must be integer from 0--4")
+    verbosity > 4 |
+    verbosity %% 1 != 0) {
+    stop("verbosity must be integer from 0--4")
+  }
   if (seed %% 1 != 0) stop("seed must be an integer")
 
   # set seed
-  set.seed(seed, kind="Mersenne-Twister", normal.kind="Inversion")
+  set.seed(seed, kind = "Mersenne-Twister", normal.kind = "Inversion")
 
 
 
   # function to return difference in time in minute units
-  mindifftime <- function(t1, t2){
-    as.numeric(t2-t1, units="mins")
+  mindifftime <- function(t1, t2) {
+    as.numeric(t2 - t1, units = "mins")
   }
 
   # initialise likelihood vector
   totiter <- burnin + n * space
-  lik     <- rep(0, totiter)
+  lik <- rep(0, totiter)
 
 
 
@@ -78,30 +79,33 @@ hdp_posterior <- function(hdp, burnin, n, space, cpiter=1,
 
 
 
-  #report burn-in time
+  # report burn-in time
   prevtime <- Sys.time()
-  print(sprintf("%d burn-in iterations in %1.1f mins",
-                burnin, mindifftime(starttime, prevtime)))
+  print(sprintf(
+    "%d burn-in iterations in %1.1f mins",
+    burnin, mindifftime(starttime, prevtime)
+  ))
   curriter <- burnin
 
   # initialise list for posterior sample output
-  sample  <- rep(list(hdp_getstate(hdplist)), n)
+  sample <- rep(list(hdp_getstate(hdplist)), n)
 
   # collect n posterior samples
-  for (samp in 1:n){
-
+  for (samp in 1:n) {
     output <- iterate(hdplist, space, cpiter, verbosity)
     hdplist <- output[[1]]
-    lik[burnin + (samp-1) * space + (1:space)] <- output[[2]]
+    lik[burnin + (samp - 1) * space + (1:space)] <- output[[2]]
     sample[[samp]] <- hdp_getstate(hdplist)
 
-    #report time every 10 samples if > 1 min has passed
+    # report time every 10 samples if > 1 min has passed
     tracktime <- Sys.time()
     curriter <- curriter + space
-    if (mindifftime(prevtime, tracktime) > 1 & samp %% 10 == 0){
+    if (mindifftime(prevtime, tracktime) > 1 & samp %% 10 == 0) {
       elapsedtime <- mindifftime(starttime, tracktime)
-      print(sprintf("time %1.1f ETC %1.1f mins",
-                    elapsedtime, elapsedtime / curriter * totiter))
+      print(sprintf(
+        "time %1.1f ETC %1.1f mins",
+        elapsedtime, elapsedtime / curriter * totiter
+      ))
       prevtime <- tracktime
     }
   }
@@ -114,33 +118,36 @@ hdp_posterior <- function(hdp, burnin, n, space, cpiter=1,
   alpha <- t(sapply(sample, function(x) x$alpha))
 
   # if only one conparam, then alpha can have wrong dims (vector not matrix)
-  if (dim(alpha)[1]==1 & n > 1) {
-    alpha <- matrix(alpha, ncol=1)
+  if (dim(alpha)[1] == 1 & n > 1) {
+    alpha <- matrix(alpha, ncol = 1)
   }
 
-  #translate hdplist back to HDPObject class
+  # translate hdplist back to HDPObject class
   hdp <- as.hdpState(hdplist)
   remove(hdplist)
 
   ans <- new("hdpSampleChain",
-             seed = as.integer(seed),
-             settings = list(burnin=burnin,
-                             n=n,
-                             space=space,
-                             cpiter=cpiter),
-             hdp = hdp,
-             lik = lik,
-             numcluster = numclass,
-             cp_values = alpha,
-             clust_categ_counts = classqq,
-             clust_dp_counts = classnd,
-             numcomp = as.integer(NULL),
-             prop.ex = as.numeric(NULL),
-             comp_cos_merge = as.numeric(NULL),
-             comp_categ_counts = list(),
-             comp_dp_counts = list(),
-             comp_categ_distn = list(),
-             comp_dp_distn = list())
+    seed = as.integer(seed),
+    settings = list(
+      burnin = burnin,
+      n = n,
+      space = space,
+      cpiter = cpiter
+    ),
+    hdp = hdp,
+    lik = lik,
+    numcluster = numclass,
+    cp_values = alpha,
+    clust_categ_counts = classqq,
+    clust_dp_counts = classnd,
+    numcomp = as.integer(NULL),
+    prop.ex = as.numeric(NULL),
+    comp_cos_merge = as.numeric(NULL),
+    comp_categ_counts = list(),
+    comp_dp_counts = list(),
+    comp_categ_distn = list(),
+    comp_dp_distn = list()
+  )
 
   # check validity and return
   if (!validObject(ans)) warning("Not a valid hdpSampleChain object.")

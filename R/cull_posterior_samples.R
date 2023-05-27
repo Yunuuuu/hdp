@@ -20,21 +20,19 @@
 #' chain_adj <- cull_posterior_samples(mut_example_chain, 20)
 #' plot_lik(chain_adj)
 #' plot_numcluster(chain_adj)
-
-cull_posterior_samples <- function(chain, ncull){
-
+cull_posterior_samples <- function(chain, ncull) {
   # input checks
   if (!is(chain, "hdpSampleChain")) {
     stop("chain must have class hdpSampleChain")
   }
   if (!validObject(chain)) stop("chain not a valid hdpSampleChain object")
   if (ncull < 1 || ncull >= hdp_settings(chain)$n ||
-        ncull %% 1L != 0L) {
+    ncull %% 1L != 0L) {
     stop("ncull must be positive integer less than number of samples in chain")
   }
 
   # if component slot exist, clear them
-  if (length(comp_categ_counts(chain)) > 0L ){
+  if (length(comp_categ_counts(chain)) > 0L) {
     message("Deleting component calculations. Re-run hdp_extract_components")
     numcomp <- as.integer(NULL)
     prop.ex <- as.numeric(NULL)
@@ -51,18 +49,17 @@ cull_posterior_samples <- function(chain, ncull){
 
   # adjust settings
   chain@settings$n <- old_n - ncull
-  chain@settings$burnin <- old_burnin + ncull*space
+  chain@settings$burnin <- old_burnin + ncull * space
 
   # cut first ncull elements of numcluster, cp_values,
   # clust_categ_counts, clust_dp_counts.
 
   chain@numcluster <- chain@numcluster[-c(1:ncull)]
-  chain@cp_values <- as.matrix(chain@cp_values[-c(1:ncull),])
+  chain@cp_values <- as.matrix(chain@cp_values[-c(1:ncull), ])
   chain@clust_categ_counts <- chain@clust_categ_counts[-c(1:ncull)]
   chain@clust_dp_counts <- chain@clust_dp_counts[-c(1:ncull)]
 
   # check validity and return
   if (!validObject(chain)) warning("Not a valid hdpSampleChain object.")
   return(chain)
-
 }

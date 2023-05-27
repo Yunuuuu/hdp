@@ -6,25 +6,24 @@
 #' @seealso \code{\link{hdp_posterior}}
 #' @export
 
-hdp_multi_chain <- function(chain_list){
-
+hdp_multi_chain <- function(chain_list) {
   if (!is.list(chain_list) ||
-        any(sapply(chain_list, function(x) !is(x, "hdpSampleChain")))) {
+    any(sapply(chain_list, function(x) !is(x, "hdpSampleChain")))) {
     stop("chain_list must be a list of hdpSampleChain objects")
   }
 
   ans <- new("hdpSampleMulti",
-             chains = chain_list,
-             numcomp = as.integer(NULL),
-             prop.ex = as.numeric(NULL),
-             comp_cos_merge = as.numeric(NULL),
-             comp_categ_counts = list(),
-             comp_dp_counts = list(),
-             comp_categ_distn= list(),
-             comp_dp_distn= list())
+    chains = chain_list,
+    numcomp = as.integer(NULL),
+    prop.ex = as.numeric(NULL),
+    comp_cos_merge = as.numeric(NULL),
+    comp_categ_counts = list(),
+    comp_dp_counts = list(),
+    comp_categ_distn = list(),
+    comp_dp_distn = list()
+  )
 
   # check validity and return
   if (!validObject(ans)) warning("Not a valid hdpSampleMulti object.")
   return(ans)
-
 }

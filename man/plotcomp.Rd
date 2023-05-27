@@ -7,21 +7,50 @@
 \alias{plot_dp_comp_exposure}
 \title{Plot extracted components}
 \usage{
-plot_comp_size(hdpsample, legend = TRUE, col_a = "hotpink",
-  col_b = "skyblue3", xlab = "Component", ylab = "Number of data items",
-  ...)
+plot_comp_size(
+  hdpsample,
+  legend = TRUE,
+  col_a = "hotpink",
+  col_b = "skyblue3",
+  xlab = "Component",
+  ylab = "Number of data items",
+  ...
+)
 
-plot_comp_distn(hdpsample, comp = NULL, cat_names = NULL, grouping = NULL,
-  col = "grey70", col_nonsig = NULL, show_group_labels = FALSE,
-  cred_int = TRUE, weights = NULL, plot_title = NULL,
-  group_label_height = 1.05, cex.cat = 0.7, ...)
+plot_comp_distn(
+  hdpsample,
+  comp = NULL,
+  cat_names = NULL,
+  grouping = NULL,
+  col = "grey70",
+  col_nonsig = NULL,
+  show_group_labels = FALSE,
+  cred_int = TRUE,
+  weights = NULL,
+  plot_title = NULL,
+  group_label_height = 1.05,
+  cex.cat = 0.7,
+  ...
+)
 
-plot_dp_comp_exposure(hdpsample, dpindices, col_comp, dpnames = NULL,
-  main_text = NULL, incl_numdata_plot = TRUE, incl_nonsig = TRUE,
-  incl_comp0 = TRUE, ylab_numdata = "Number of data items",
-  ylab_exp = "Component exposure", leg.title = "Component",
-  cex.names = 0.6, cex.axis = 0.7, mar = c(1, 4, 2, 0.5), oma = c(1.5,
-  1.5, 1, 1), ...)
+plot_dp_comp_exposure(
+  hdpsample,
+  dpindices,
+  col_comp,
+  dpnames = NULL,
+  main_text = NULL,
+  incl_numdata_plot = TRUE,
+  incl_nonsig = TRUE,
+  incl_comp0 = TRUE,
+  ylab_numdata = "Number of data items",
+  ylab_exp = "Component exposure",
+  leg.title = "Component",
+  cex.names = 0.6,
+  cex.axis = 0.7,
+  mar = c(1, 4, 2, 0.5),
+  oma = c(1.5, 1.5, 1, 1),
+  ...
+)
 }
 \arguments{
 \item{hdpsample}{A hdpSampleChain or hdpSampleMulti object including output
@@ -101,19 +130,27 @@ Plot extracted components
 }
 \examples{
 mut_example_multi <- hdp_extract_components(mut_example_multi)
-plot_comp_size(mut_example_multi, bty="L")
+plot_comp_size(mut_example_multi, bty = "L")
 bases <- c("A", "C", "G", "T")
-trinuc_context <- paste0(rep(rep(bases, times=6), each=4),
-                         rep(c("C", "T"), each=48),
-                         rep(bases, times=24))
+trinuc_context <- paste0(
+  rep(rep(bases, times = 6), each = 4),
+  rep(c("C", "T"), each = 48),
+  rep(bases, times = 24)
+)
 group_factor <- as.factor(rep(c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G"),
-                           each=16))
-plot_comp_distn(mut_example_multi, cat_names=trinuc_context,
-                grouping=group_factor, col=RColorBrewer::brewer.pal(6, "Set2"),
-                col_nonsig="grey80", show_group_labels=TRUE)
+  each = 16
+))
+plot_comp_distn(mut_example_multi,
+  cat_names = trinuc_context,
+  grouping = group_factor, col = RColorBrewer::brewer.pal(6, "Set2"),
+  col_nonsig = "grey80", show_group_labels = TRUE
+)
+plot_dp_comp_exposure(
+  mut_example_multi, 5:30,
+  RColorBrewer::brewer.pal(12, "Set3")
+)
 plot_dp_comp_exposure(mut_example_multi, 5:30,
-                      RColorBrewer::brewer.pal(12, "Set3"))
-plot_dp_comp_exposure(mut_example_multi, 5:30,
-                      RColorBrewer::brewer.pal(12, "Set3"),
-                      incl_numdata_plot=FALSE, incl_nonsig=FALSE)
+  RColorBrewer::brewer.pal(12, "Set3"),
+  incl_numdata_plot = FALSE, incl_nonsig = FALSE
+)
 }

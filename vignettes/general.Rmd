@@ -14,7 +14,7 @@ vignette: >
 ```{r style, echo = FALSE, results = 'asis'}
 BiocStyle::markdown()
 
-knitr::opts_chunk$set(fig.width=6, fig.height=5)
+knitr::opts_chunk$set(fig.width = 6, fig.height = 5)
 ```
 
 
@@ -103,7 +103,7 @@ of all other data items.
 
 
 ```{r quickchain}
-quick_chain <- hdp_posterior(quick_hdp, burnin=500, n=100, space=40, seed=1234)
+quick_chain <- hdp_posterior(quick_hdp, burnin = 500, n = 100, space = 40, seed = 1234)
 quick_chain
 ```
 
@@ -126,11 +126,11 @@ Note that the best approximation of the infinite random sampling space is achiev
 independent sampling chains (described in a later section). 
 
 ```{r plotchain}
-plot_lik(quick_chain, bty="L")
+plot_lik(quick_chain, bty = "L")
 
-plot_numcluster(quick_chain, bty="L")
+plot_numcluster(quick_chain, bty = "L")
 
-plot_data_assigned(quick_chain, bty="L")
+plot_data_assigned(quick_chain, bty = "L")
 ```
 
 If the burn-in time was too short, the function `cull_posterior_samples()` throws
@@ -167,23 +167,27 @@ to explain 96% of the data.
 The following plot shows the number of data items assigned to each component 
 in each posterior sample.
 ```{r plotcompsize}
-plot_comp_size(quick_chain, bty="L", lab=c(3, 5, 7))
+plot_comp_size(quick_chain, bty = "L", lab = c(3, 5, 7))
 ```
 
 The following plot shows the mean distribution of data categories for each component,
 and the 95% credibility intervals (thin black lines). See `?plot_comp_distn` for more options. 
 ```{r plotcompdistn}
-par(mfrow=c(2,2), mar=c(3, 3, 2, 1))
-plot_comp_distn(quick_chain, cat_names=paste0("Categ", 1:6), col="skyblue3")
+par(mfrow = c(2, 2), mar = c(3, 3, 2, 1))
+plot_comp_distn(quick_chain, cat_names = paste0("Categ", 1:6), col = "skyblue3")
 ```
 
 The following plots show the mean distribution of components at each specified DP node. 
 See `?plot_dp_comp_exposure` for more options.  
 ```{r plotdpexposure}
-plot_dp_comp_exposure(quick_chain, dpindices=2:6, main_text="First five samples",
-                      col=RColorBrewer::brewer.pal(4, "Set3"))
-plot_dp_comp_exposure(quick_chain, dpindices=7:11, main_text="Last five samples",
-                      col=RColorBrewer::brewer.pal(4, "Set3"))
+plot_dp_comp_exposure(quick_chain,
+  dpindices = 2:6, main_text = "First five samples",
+  col = RColorBrewer::brewer.pal(4, "Set3")
+)
+plot_dp_comp_exposure(quick_chain,
+  dpindices = 7:11, main_text = "Last five samples",
+  col = RColorBrewer::brewer.pal(4, "Set3")
+)
 ```
 
 Note that posterior samples collected off just one finite chain are somewhat correlated
@@ -207,13 +211,14 @@ parameters are rate=2, shape=0.5). The parent DP node draws from the 'base distr
 defined as a uniform Dirichlet with pseudocount 1 in each data category. 
 
 ```{r hdpinit}
-my_hdp <- hdp_init(ppindex=c(0, 1, 1), 
-                   cpindex=c(1, 2, 2), 
-                   hh=rep(1, 6), 
-                   alphaa=rep(2, 2), 
-                   alphab=rep(0.5, 2))
+my_hdp <- hdp_init(
+  ppindex = c(0, 1, 1),
+  cpindex = c(1, 2, 2),
+  hh = rep(1, 6),
+  alphaa = rep(2, 2),
+  alphab = rep(0.5, 2)
+)
 my_hdp
-
 ```
 
 
@@ -224,13 +229,15 @@ Next, we add two more concentration parameters, and ten further DP nodes (five
 children per parent). 
 
 ```{r add}
-my_hdp <- hdp_addconparam(my_hdp, 
-                          alphaa=rep(2, 2), 
-                          alphab=rep(0.5, 2))
-my_hdp <- hdp_adddp(my_hdp, 
-                    numdp=10, 
-                    ppindex=rep(2:3, each=5), 
-                    cpindex=rep(3:4, each=5))
+my_hdp <- hdp_addconparam(my_hdp,
+  alphaa = rep(2, 2),
+  alphab = rep(0.5, 2)
+)
+my_hdp <- hdp_adddp(my_hdp,
+  numdp = 10,
+  ppindex = rep(2:3, each = 5),
+  cpindex = rep(3:4, each = 5)
+)
 my_hdp
 ```
 
@@ -239,8 +246,9 @@ DP nodes specified.
 
 ```{r setdata}
 my_hdp <- hdp_setdata(my_hdp,
-                      dpindex=4:13,
-                      data=example_data_hdp)
+  dpindex = 4:13,
+  data = example_data_hdp
+)
 my_hdp
 ```
 
@@ -252,7 +260,7 @@ sampling). Use `dp_activate()` to activate them and specify the number of starti
 To see the effect: 
 
 ```{r activate}
-dp_activate(my_hdp, dpindex=1:13, initcc=2, seed=5678)
+dp_activate(my_hdp, dpindex = 1:13, initcc = 2, seed = 5678)
 ```
 
 After `dp_activate`, the `hdpState` object will be ready for posterior sampling!
@@ -268,16 +276,16 @@ be underestimated if only one posterior sampling chain is used.
 ```{r runmultichain}
 chlist <- vector("list", 4)
 
-for (i in 1:4){
-  
-  activated_hdp <- dp_activate(my_hdp, dpindex=1:13, initcc=2, seed=i*1e2)
-  
-  chlist[[i]] <- hdp_posterior(activated_hdp, 
-                               burnin=2500,
-                               n=50,
-                               space=100,
-                               cpiter=2, 
-                               seed=i*1e4)
+for (i in 1:4) {
+  activated_hdp <- dp_activate(my_hdp, dpindex = 1:13, initcc = 2, seed = i * 1e2)
+
+  chlist[[i]] <- hdp_posterior(activated_hdp,
+    burnin = 2500,
+    n = 50,
+    space = 100,
+    cpiter = 2,
+    seed = i * 1e4
+  )
 }
 
 chlist[1:2]
@@ -295,10 +303,10 @@ To plot diagnostics for the constituent chains stored within a
 `hdpSampleMulti` object, use `lapply()` over `chains()`. 
 
 ```{r plotchainmulti, fig.width=7, fig.height=5}
-par(mfrow=c(2,2), mar=c(4, 4, 2, 1))
-p1 <- lapply(chains(multi), plot_lik, bty="L")
-p2 <- lapply(chains(multi), plot_numcluster, bty="L")
-p3 <- lapply(chains(multi), plot_data_assigned, bty="L")
+par(mfrow = c(2, 2), mar = c(4, 4, 2, 1))
+p1 <- lapply(chains(multi), plot_lik, bty = "L")
+p2 <- lapply(chains(multi), plot_numcluster, bty = "L")
+p3 <- lapply(chains(multi), plot_data_assigned, bty = "L")
 ```
 
 
@@ -314,16 +322,20 @@ captured by the 'zero component' for noise and uncertainty.
 multi <- hdp_extract_components(multi)
 multi
 
-plot_comp_size(multi, bty="L", lab=c(3, 5, 7))
+plot_comp_size(multi, bty = "L", lab = c(3, 5, 7))
 
-par(mfrow=c(2,2), mar=c(3, 3, 2, 1))
-plot_comp_distn(multi, cat_names=paste0("Categ", 1:6), col="skyblue3")
+par(mfrow = c(2, 2), mar = c(3, 3, 2, 1))
+plot_comp_distn(multi, cat_names = paste0("Categ", 1:6), col = "skyblue3")
 
-par(mfrow=c(1,1))
-plot_dp_comp_exposure(multi, dpindices=4:8, main_text="First five samples",
-                      col=RColorBrewer::brewer.pal(3, "Set3"))
-plot_dp_comp_exposure(multi, dpindices=9:13, main_text="Last five samples",
-                      col=RColorBrewer::brewer.pal(3, "Set3"))
+par(mfrow = c(1, 1))
+plot_dp_comp_exposure(multi,
+  dpindices = 4:8, main_text = "First five samples",
+  col = RColorBrewer::brewer.pal(3, "Set3")
+)
+plot_dp_comp_exposure(multi,
+  dpindices = 9:13, main_text = "Last five samples",
+  col = RColorBrewer::brewer.pal(3, "Set3")
+)
 ```
 
 
@@ -342,9 +354,9 @@ In the following example, a toy dataset of 100 samples and 10 data categories wa
 dim(example_data_hdp_prior)
 # the two provided known priors:
 example_known_priors
-par(mfrow=c(1,2))
-barplot(example_known_priors[,1], main='Known prior 1')
-barplot(example_known_priors[,2], main='Known prior 2')
+par(mfrow = c(1, 2))
+barplot(example_known_priors[, 1], main = "Known prior 1")
+barplot(example_known_priors[, 2], main = "Known prior 2")
 ```
 
 
@@ -362,39 +374,39 @@ Any new components identified are prefixed with "N".
 # hdp_p <- hdp_addconparam(hdp_p, alphaa=c(1,1), alphab=c(1,1))
 # hdp_p <- hdp_adddp(hdp_p, 101, c(1, rep(4, 100)), c(3, rep(4, 100)))
 # hdp_p <- hdp_setdata(hdp_p, 5:104, example_data_hdp_prior)
-# 
+#
 # chlist <- vector("list", 4)
-# 
+#
 # for (i in 1:4){
-#   
+#
 #   activated_hdp <- dp_activate(hdp_p, dpindex=4:104, initcc=4, seed=i*1e3)
-#   
-#   chlist[[i]] <- hdp_posterior(activated_hdp, 
+#
+#   chlist[[i]] <- hdp_posterior(activated_hdp,
 #                                burnin=2500,
 #                                n=50,
 #                                space=100,
-#                                cpiter=2, 
+#                                cpiter=2,
 #                                seed=i*1e5)
 # }
-# 
+#
 # hdp_p <- hdp_multi_chain(chlist)
 
 # loading pre-made copy
 hdp_p
 
-par(mfrow=c(2,2), mar=c(4, 4, 2, 1))
-p1 <- lapply(chains(hdp_p), plot_lik, bty="L")
-p2 <- lapply(chains(hdp_p), plot_numcluster, bty="L")
-p3 <- lapply(chains(hdp_p), plot_data_assigned, bty="L")
+par(mfrow = c(2, 2), mar = c(4, 4, 2, 1))
+p1 <- lapply(chains(hdp_p), plot_lik, bty = "L")
+p2 <- lapply(chains(hdp_p), plot_numcluster, bty = "L")
+p3 <- lapply(chains(hdp_p), plot_data_assigned, bty = "L")
 
 
 hdp_p <- hdp_extract_components(hdp_p)
-par(mfrow=c(1,1))
-plot_comp_size(hdp_p, bty="L")
-par(mfrow=c(2,2))
-plot_comp_distn(hdp_p, comp=1:4)
-par(mfrow=c(1,1))
-plot_dp_comp_exposure(hdp_p, 5:104, col_comp=RColorBrewer::brewer.pal(5, 'Purples'))
+par(mfrow = c(1, 1))
+plot_comp_size(hdp_p, bty = "L")
+par(mfrow = c(2, 2))
+plot_comp_distn(hdp_p, comp = 1:4)
+par(mfrow = c(1, 1))
+plot_dp_comp_exposure(hdp_p, 5:104, col_comp = RColorBrewer::brewer.pal(5, "Purples"))
 ```
 
 
@@ -405,7 +417,6 @@ For documentation on `hdpState` objects, see `class?hdpState`.
 Some slots of `hdpState` can be accessed like so:
 
 ```{r hdpstate}
-
 # number of data categories
 numcateg(quick_hdp)
 
@@ -445,14 +456,12 @@ activating_seed(quick_hdp)
 # index of frozen nodes containing psuedo-data for prior components,
 # only used if initialised via hdp_prior_init
 # pseudoDP()
-
 ```
 
 For documentation on `hdpSampleChain` objects, see `class?hdpSampleChain`. 
 Some slots of `hdpSampleChain` can be accessed like so:
 
 ```{r hdpsamplechain}
-
 # random seed
 sampling_seed(quick_chain)
 
@@ -471,17 +480,16 @@ numcluster(quick_chain)[1:10]
 # concentration parameter values at each posterior sample
 cp_values(quick_chain)[1:10]
 
-# List of matrices (one from each posterior sample) counting the category-cluster 
-# data assignment across all DP nodes. Number of rows is the number of 
-# categories (constant), and number of columns is the number of clusters 
+# List of matrices (one from each posterior sample) counting the category-cluster
+# data assignment across all DP nodes. Number of rows is the number of
+# categories (constant), and number of columns is the number of clusters
 # in that posterior sample (variable).
 clust_categ_counts(quick_chain)[1:3]
 
-# List of matrices (one from each posterior sample) counting within-DP cluster 
+# List of matrices (one from each posterior sample) counting within-DP cluster
 # assignment (aggregating across data categories). Number of rows is the number of
 # DPs (constant), and number of columns is the number of clusters in that posterior sample (variable).
 clust_dp_counts(quick_chain)[1:3]
-
 ```
 
 
@@ -498,35 +506,33 @@ Accessors for the component summary stats are the same for `hdpSampleChain`
 and `hdpSampleMulti` objects. 
 
 ```{r comp_access}
-
 # Number of components extracted (not including comp zero)
 numcomp(multi)
 
 # Propertion of data assigned to main components (not comp zero)
 prop.ex(multi)
 
-# List of matrices (one for each component) counting the sample-category data 
-# assignment across all DP nodes. Number of rows is the number of posterior samples, 
+# List of matrices (one for each component) counting the sample-category data
+# assignment across all DP nodes. Number of rows is the number of posterior samples,
 # and number of columns is the number of data categories.
-comp_categ_counts(multi)[[2]][1:10,]
+comp_categ_counts(multi)[[2]][1:10, ]
 
-# List of matrices (one for each DP) counting sample-component assignment 
-# (aggregating across data categories). Number of rows is the number of posterior 
+# List of matrices (one for each DP) counting sample-component assignment
+# (aggregating across data categories). Number of rows is the number of posterior
 # samples, and number of columns is the number of components.
-comp_dp_counts(multi)[[2]][1:10,]
+comp_dp_counts(multi)[[2]][1:10, ]
 
-# List with elements "mean" and "cred.int", containing matrices with the mean 
-# (and lower/upper 95% credibility interval) over data categories for each component. 
-# Number of rows is the number of components, and number of columns is the 
+# List with elements "mean" and "cred.int", containing matrices with the mean
+# (and lower/upper 95% credibility interval) over data categories for each component.
+# Number of rows is the number of components, and number of columns is the
 # number of data categories.
 comp_categ_distn(multi)
 
-# List with elements "mean" and "cred.int", containing matrices with the mean 
-# (and lower/upper 95% credibility interval) distribution over components for each DP. 
+# List with elements "mean" and "cred.int", containing matrices with the mean
+# (and lower/upper 95% credibility interval) distribution over components for each DP.
 # Number of rows is the number of DPs, and number of columns is the number of components.
 comp_dp_distn(multi)$mean
 comp_dp_distn(multi)$cred.int[4:7]
-
 ```
 
 

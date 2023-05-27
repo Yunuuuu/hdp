@@ -27,26 +27,24 @@
 #' # a uniform Dirichlet base distribution over six possible data categories,
 #' # and three possible concentration parameters to be shared across the HDP tree
 #' # (top DP using conparam number 1), each with hyperparameters (1,2).
-#' hdp_init(ppindex=0, cpindex=1, hh=rep(1, 6), alphaa=rep(1, 3), alphab=rep(2, 3))
+#' hdp_init(ppindex = 0, cpindex = 1, hh = rep(1, 6), alphaa = rep(1, 3), alphab = rep(2, 3))
 #'
 #' # initialise a HDP with one 'top' DP node off the base distribution,
 #' # AND two children DP nodes off that parent. The two children DPs share a different
 #' # concentration parameter (hyperparameters are (2, 0.5)).
-#' hdp_init(ppindex=c(0, 1, 1), cpindex=c(1, 2, 2), hh=rep(1, 6), alphaa=rep(2, 2), alphab=rep(0.5, 2))
-
-hdp_init <- function(ppindex, cpindex, hh, alphaa, alphab){
-
+#' hdp_init(ppindex = c(0, 1, 1), cpindex = c(1, 2, 2), hh = rep(1, 6), alphaa = rep(2, 2), alphab = rep(0.5, 2))
+hdp_init <- function(ppindex, cpindex, hh, alphaa, alphab) {
   # input checks
   if (any(ppindex < 0) |
-        any(ppindex %% 1 != 0) |
-        any(ppindex >= 1:length(ppindex))) {
+    any(ppindex %% 1 != 0) |
+    any(ppindex >= 1:length(ppindex))) {
     stop("ppindex must be non-negative integer/s,
          referring to a parent of smaller index")
   }
   if (any(cpindex < 1) |
-        any(cpindex %% 1 != 0) |
-        any(cpindex > length(alphaa)) |
-        length(cpindex) != length(ppindex)) {
+    any(cpindex %% 1 != 0) |
+    any(cpindex > length(alphaa)) |
+    length(cpindex) != length(ppindex)) {
     stop("cpindex must be positive integer/s, no greater than
          the length of alphaa and alphab, and same length as ppindex")
   }
@@ -62,60 +60,63 @@ hdp_init <- function(ppindex, cpindex, hh, alphaa, alphab){
 
   # initialise base distribution
   base <- new("hdpBase",
-              hh = hh,
-              classqq = newclass(hh),
-              numclass = 0L)
+    hh = hh,
+    classqq = newclass(hh),
+    numclass = 0L
+  )
 
   # initialise hdpState
   numdp <- length(ppindex)
   numconparam <- length(alphaa)
   hdp <- new("hdpState",
-             numdp         = numdp,
-             numconparam   = numconparam,
-             base          = base,
-             conparam      = vector("list", numconparam),
-             dp            = vector("list", numdp),
-             dpstate       = as.integer(HELDOUT * rep(1, numdp)),
-             ppindex       = as.integer(ppindex),
-             cpindex       = as.integer(cpindex),
-             ttindex       = as.integer(rep(0,numdp)),
-             initcc        = as.integer(NULL),
-             seed_activate = as.integer(NULL),
-             pseudoDP      = as.integer(NULL)
-             )
+    numdp         = numdp,
+    numconparam   = numconparam,
+    base          = base,
+    conparam      = vector("list", numconparam),
+    dp            = vector("list", numdp),
+    dpstate       = as.integer(HELDOUT * rep(1, numdp)),
+    ppindex       = as.integer(ppindex),
+    cpindex       = as.integer(cpindex),
+    ttindex       = as.integer(rep(0, numdp)),
+    initcc        = as.integer(NULL),
+    seed_activate = as.integer(NULL),
+    pseudoDP      = as.integer(NULL)
+  )
 
   # fill in ttindex slot
   tt <- rep(0, hdp@numconparam)
-  for (jj in 1:hdp@numdp){
-    cp              <- cpindex[jj]
-    tt[cp]          <- tt[cp] + 1
+  for (jj in 1:hdp@numdp) {
+    cp <- cpindex[jj]
+    tt[cp] <- tt[cp] + 1
     hdp@ttindex[jj] <- as.integer(tt[cp])
   }
 
   # fill in dp list
-  for (jj in 1:hdp@numdp){
+  for (jj in 1:hdp@numdp) {
     hdp@dp[[jj]] <- new("hdpDP",
-                        datacc  = vector("integer"),
-                        classnd = 0L,
-                        classnt = 0L,
-                        beta    = 1,
-                        alpha   = vector("numeric"),
-                        numdata = 0L,
-                        datass  = vector("integer"))
+      datacc  = vector("integer"),
+      classnd = 0L,
+      classnt = 0L,
+      beta    = 1,
+      alpha   = vector("numeric"),
+      numdata = 0L,
+      datass  = vector("integer")
+    )
   }
 
   # fill in conparam list
-  for (cp in 1:hdp@numconparam){
+  for (cp in 1:hdp@numconparam) {
     a <- alphaa[cp]
     b <- alphab[cp]
     numdpcp <- as.integer(sum(cpindex == cp))
     hdp@conparam[[cp]] <- new("hdpConparam",
-                              alphaa  = a,
-                              alphab  = b,
-                              numdp   = numdpcp,
-                              alpha   = a / b,
-                              totalnd = as.integer(rep(0, numdpcp)),
-                              totalnt = as.integer(rep(0, numdpcp)))
+      alphaa  = a,
+      alphab  = b,
+      numdp   = numdpcp,
+      alpha   = a / b,
+      totalnd = as.integer(rep(0, numdpcp)),
+      totalnt = as.integer(rep(0, numdpcp))
+    )
   }
 
   # check validity and return

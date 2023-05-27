@@ -14,7 +14,7 @@ vignette: >
 ```{r style, echo = FALSE, results = 'asis'}
 BiocStyle::markdown()
 
-knitr::opts_chunk$set(fig.width=6, fig.height=5)
+knitr::opts_chunk$set(fig.width = 6, fig.height = 5)
 ```
 
 For the background to this document, see the other package vignette
@@ -47,16 +47,16 @@ are tallied across 100 lung cancers, 100 ovarian cancers, and 100 melanomas.
 ```{r loaddata}
 library(hdp)
 # library(GenomicRanges)
-# 
+#
 # # Lung adenocarcinoma
 # data(luad_tcga, package="SomaticCancerAlterations")
-# 
+#
 # # Ovarian serous cystadenocarcinoma
 # data(ov_tcga, package="SomaticCancerAlterations")
-# 
+#
 # # Skin cutaneous melanoma
 # data(skcm_tcga, package="SomaticCancerAlterations")
-# 
+#
 # # only keep SNP type, add cancer type to sample name, and only keep
 # # necessary metadata. Only keep 100 samples. Then concatenate and sort.
 # for (cancer_name in c("luad", "ov", "skcm")){
@@ -73,12 +73,12 @@ library(hdp)
 
 # tally mutation counts in 96 base substitution classes defined by trinucleotide context
 # Could use the tally_mutations_96() function from https://github.com/nicolaroberts/nrmisc (hg19 specific)
-# bit slow - don't run. Load pre-made copy. 
+# bit slow - don't run. Load pre-made copy.
 # mut_count <- nrmisc::tally_mutations_96(variants)
 dim(mut_count)
-head(mut_count[,1:5])
-tail(mut_count[,1:5])
-table(sapply(strsplit(row.names(mut_count), '_'), `[`, 1))
+head(mut_count[, 1:5])
+tail(mut_count[, 1:5])
+table(sapply(strsplit(row.names(mut_count), "_"), `[`, 1))
 ```
 
 
@@ -104,19 +104,21 @@ with hyperparameters rate=1, shape=1.
 
 ```{r inithdp}
 # initialise HDP
-hdp_mut <- hdp_init(ppindex = c(0, rep(1, 3), rep(2:4, each=100)), # index of parental nodes
-                    cpindex = c(1, rep(2, 3), rep(3:5, each=100)), # index of concentration param
-                    hh=rep(1, 96), # prior is uniform over the 96 mutation categories
-                    alphaa=rep(1, 5), # shape hyperparams for five different CPs
-                    alphab=rep(1, 5)) # rate hyperparams for five different CPs
+hdp_mut <- hdp_init(
+  ppindex = c(0, rep(1, 3), rep(2:4, each = 100)), # index of parental nodes
+  cpindex = c(1, rep(2, 3), rep(3:5, each = 100)), # index of concentration param
+  hh = rep(1, 96), # prior is uniform over the 96 mutation categories
+  alphaa = rep(1, 5), # shape hyperparams for five different CPs
+  alphab = rep(1, 5)
+) # rate hyperparams for five different CPs
 
 # add data to leaf nodes (one per cancer sample, in row order of mut_count)
-hdp_mut <- hdp_setdata(hdp_mut, 
-                       dpindex = 5:numdp(hdp_mut), # index of nodes to add data to
-                       mut_count) # input data (mutation counts, sample rows match up with specified dpindex)
+hdp_mut <- hdp_setdata(hdp_mut,
+  dpindex = 5:numdp(hdp_mut), # index of nodes to add data to
+  mut_count
+) # input data (mutation counts, sample rows match up with specified dpindex)
 
 hdp_mut
-
 ```
 
 ## Run multiple posterior sampling chains
@@ -134,10 +136,10 @@ adjust the burn-in and space parameters accordingly, usually collecting at least
 
 # chlist <- vector("list", 4)
 # for (i in 1:4){
-# 
+#
 #   # activate DPs, 10 initial components
 #   hdp_activated <- dp_activate(hdp_mut, 1:numdp(hdp_mut), initcc=10, seed=i*200)
-# 
+#
 #   chlist[[i]] <- hdp_posterior(hdp_activated,
 #                                burnin=5000,
 #                                n=50,
@@ -145,15 +147,15 @@ adjust the burn-in and space parameters accordingly, usually collecting at least
 #                                cpiter=3,
 #                                seed=i*1e3)
 # }
-# 
+#
 # # example multi object
 # mut_example_multi <- hdp_multi_chain(chlist)
 mut_example_multi
 
-par(mfrow=c(2,2), mar=c(4, 4, 2, 1))
-p1 <- lapply(chains(mut_example_multi), plot_lik, bty="L", start=1000)
-p2 <- lapply(chains(mut_example_multi), plot_numcluster, bty="L")
-p3 <- lapply(chains(mut_example_multi), plot_data_assigned, bty="L")
+par(mfrow = c(2, 2), mar = c(4, 4, 2, 1))
+p1 <- lapply(chains(mut_example_multi), plot_lik, bty = "L", start = 1000)
+p2 <- lapply(chains(mut_example_multi), plot_numcluster, bty = "L")
+p3 <- lapply(chains(mut_example_multi), plot_data_assigned, bty = "L")
 ```
 
 Always remember to check that the diagnostic plots show no strong trends over the 
@@ -178,47 +180,57 @@ truly contribute to that sample.
 mut_example_multi <- hdp_extract_components(mut_example_multi)
 mut_example_multi
 
-par(mfrow=c(1,1), mar=c(5, 4, 4, 2))
-plot_comp_size(mut_example_multi, bty="L")
+par(mfrow = c(1, 1), mar = c(5, 4, 4, 2))
+plot_comp_size(mut_example_multi, bty = "L")
 
-trinuc_context <- sapply(strsplit(colnames(mut_count), '\\.'), `[`, 4)
+trinuc_context <- sapply(strsplit(colnames(mut_count), "\\."), `[`, 4)
 group_factor <- as.factor(rep(c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G"),
-                           each=16))
+  each = 16
+))
 
 # pick your colours
-mut_colours <- c(RColorBrewer::brewer.pal(10, 'Paired')[seq(1,10,2)], 'grey70')
+mut_colours <- c(RColorBrewer::brewer.pal(10, "Paired")[seq(1, 10, 2)], "grey70")
 
-plot_comp_distn(mut_example_multi, cat_names=trinuc_context,
-                  grouping=group_factor, col=mut_colours,
-                  col_nonsig="grey80", show_group_labels=TRUE)
-
-plot_dp_comp_exposure(mut_example_multi, main_text="Lung adenocarcinoma",
-                      dpindices=4+(1:100), 
-                      col=RColorBrewer::brewer.pal(12, "Set3"),
-                      incl_nonsig=FALSE, 
-                      ylab_numdata = 'SNV count', ylab_exp = 'Signature exposure',
-                      leg.title = 'Signature')
-
-plot_dp_comp_exposure(mut_example_multi, main_text="Ovarian cancer",
-                      dpindices=104+(1:100), 
-                      col=RColorBrewer::brewer.pal(12, "Set3"),
-                      incl_nonsig=FALSE,
-                      ylab_numdata = 'SNV count', ylab_exp = 'Signature exposure',
-                      leg.title = 'Signature')
-
-plot_dp_comp_exposure(mut_example_multi, main_text="Melanoma",
-                      dpindices=204+(1:100), 
-                      col=RColorBrewer::brewer.pal(12, "Set3"),
-                      incl_nonsig=FALSE,
-                      ylab_numdata = 'SNV count', ylab_exp = 'Signature exposure',
-                      leg.title = 'Signature')
+plot_comp_distn(mut_example_multi,
+  cat_names = trinuc_context,
+  grouping = group_factor, col = mut_colours,
+  col_nonsig = "grey80", show_group_labels = TRUE
+)
 
 plot_dp_comp_exposure(mut_example_multi,
-                      dpindices=2:4, incl_numdata_plot=FALSE,
-                      col=RColorBrewer::brewer.pal(12, "Set3"),
-                      incl_nonsig=TRUE, cex.names=0.8,
-                      dpnames=c("Lung Adeno", "Ovarian", "Melanoma"),
-                      ylab_exp = 'Signature exposure', leg.title = 'Signature')
+  main_text = "Lung adenocarcinoma",
+  dpindices = 4 + (1:100),
+  col = RColorBrewer::brewer.pal(12, "Set3"),
+  incl_nonsig = FALSE,
+  ylab_numdata = "SNV count", ylab_exp = "Signature exposure",
+  leg.title = "Signature"
+)
+
+plot_dp_comp_exposure(mut_example_multi,
+  main_text = "Ovarian cancer",
+  dpindices = 104 + (1:100),
+  col = RColorBrewer::brewer.pal(12, "Set3"),
+  incl_nonsig = FALSE,
+  ylab_numdata = "SNV count", ylab_exp = "Signature exposure",
+  leg.title = "Signature"
+)
+
+plot_dp_comp_exposure(mut_example_multi,
+  main_text = "Melanoma",
+  dpindices = 204 + (1:100),
+  col = RColorBrewer::brewer.pal(12, "Set3"),
+  incl_nonsig = FALSE,
+  ylab_numdata = "SNV count", ylab_exp = "Signature exposure",
+  leg.title = "Signature"
+)
+
+plot_dp_comp_exposure(mut_example_multi,
+  dpindices = 2:4, incl_numdata_plot = FALSE,
+  col = RColorBrewer::brewer.pal(12, "Set3"),
+  incl_nonsig = TRUE, cex.names = 0.8,
+  dpnames = c("Lung Adeno", "Ovarian", "Melanoma"),
+  ylab_exp = "Signature exposure", leg.title = "Signature"
+)
 ```
 
 
@@ -245,33 +257,38 @@ to select the lung samples from Example 1.
 
 
 ```{r setupprior}
-cosmic.sigs <- read.table('http://cancer.sanger.ac.uk/cancergenome/assets/signatures_probabilities.txt', header=TRUE, sep='\t')
+cosmic.sigs <- read.table("http://cancer.sanger.ac.uk/cancergenome/assets/signatures_probabilities.txt", header = TRUE, sep = "\t")
 #  sort by Substitution Type and Trinucleotide
-cosmic.sigs <- cosmic.sigs[order(cosmic.sigs$Substitution.Type, cosmic.sigs$Trinucleotide),]
-prior_sigs <- as.matrix(cosmic.sigs[,grep('Signature', colnames(cosmic.sigs))])
+cosmic.sigs <- cosmic.sigs[order(cosmic.sigs$Substitution.Type, cosmic.sigs$Trinucleotide), ]
+prior_sigs <- as.matrix(cosmic.sigs[, grep("Signature", colnames(cosmic.sigs))])
 # number of prior signatures to condition on (30)
 nps <- ncol(prior_sigs)
 nps
 
-luad_prior <- hdp_prior_init(prior_distn = prior_sigs,
-                             prior_pseudoc = rep(1000, nps),
-                             hh=rep(1, 96),
-                             alphaa=c(1, 1),
-                             alphab=c(1, 1))
+luad_prior <- hdp_prior_init(
+  prior_distn = prior_sigs,
+  prior_pseudoc = rep(1000, nps),
+  hh = rep(1, 96),
+  alphaa = c(1, 1),
+  alphab = c(1, 1)
+)
 luad_prior
 
 luad_prior <- hdp_addconparam(luad_prior,
-                              alphaa = c(1,1),
-                              alphab = c(1,1))
+  alphaa = c(1, 1),
+  alphab = c(1, 1)
+)
 
 luad_prior <- hdp_adddp(luad_prior,
-                        numdp = 101,
-                        ppindex = c(1, rep(1+nps+1, 100)),
-                        cpindex = c(3, rep(4, 100)))
+  numdp = 101,
+  ppindex = c(1, rep(1 + nps + 1, 100)),
+  cpindex = c(3, rep(4, 100))
+)
 
 luad_prior <- hdp_setdata(luad_prior,
-                          dpindex = (1+nps+1)+1:100,
-                          mut_count[1:100,])
+  dpindex = (1 + nps + 1) + 1:100,
+  mut_count[1:100, ]
+)
 
 luad_prior
 ```
@@ -293,7 +310,7 @@ of new data observations (un-connected to the priors).
 #                                 dpindex = (1+nps+1)+0:100,
 #                                 initcc = nps+5,
 #                                 seed = i*1000)
-# 
+#
 #   chlist[[i]] <- hdp_posterior(luad_activated,
 #                                burnin = 4000,
 #                                n = 50,
@@ -301,14 +318,14 @@ of new data observations (un-connected to the priors).
 #                                cpiter = 3,
 #                                seed = i*1e6)
 # }
-# 
+#
 # luad_multi <- hdp_multi_chain(chlist)
 luad_multi
 
-par(mfrow=c(2,2))
-p1 <- lapply(chains(luad_multi), plot_lik, bty='L', start=1000)
-p2 <- lapply(chains(luad_multi), plot_numcluster, bty='L')
-p3 <- lapply(chains(luad_multi), plot_data_assigned, bty='L')
+par(mfrow = c(2, 2))
+p1 <- lapply(chains(luad_multi), plot_lik, bty = "L", start = 1000)
+p2 <- lapply(chains(luad_multi), plot_numcluster, bty = "L")
+p3 <- lapply(chains(luad_multi), plot_data_assigned, bty = "L")
 ```
 
 
@@ -328,20 +345,24 @@ the prior set (N1).
 luad_multi <- hdp_extract_components(luad_multi)
 luad_multi
 
-par(mfrow=c(1,1), mar=c(5, 4, 4, 2))
-plot_comp_size(luad_multi, bty="L")
+par(mfrow = c(1, 1), mar = c(5, 4, 4, 2))
+plot_comp_size(luad_multi, bty = "L")
 
-trinuc_context <- sapply(strsplit(colnames(mut_count), '\\.'), `[`, 4)
+trinuc_context <- sapply(strsplit(colnames(mut_count), "\\."), `[`, 4)
 group_factor <- as.factor(rep(c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G"),
-                              each=16))
+  each = 16
+))
 
-plot_comp_distn(luad_multi, cat_names=trinuc_context,
-                grouping=group_factor, col=mut_colours,
-                col_nonsig="grey80", show_group_labels=TRUE)
+plot_comp_distn(luad_multi,
+  cat_names = trinuc_context,
+  grouping = group_factor, col = mut_colours,
+  col_nonsig = "grey80", show_group_labels = TRUE
+)
 
-plot_dp_comp_exposure(luad_multi, 1+nps+1+(1:100), incl_nonsig = F,
-                      col=c('black', RColorBrewer::brewer.pal(8, "Set1")))
-
+plot_dp_comp_exposure(luad_multi, 1 + nps + 1 + (1:100),
+  incl_nonsig = F,
+  col = c("black", RColorBrewer::brewer.pal(8, "Set1"))
+)
 ```
 
 

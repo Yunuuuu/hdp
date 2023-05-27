@@ -17,9 +17,8 @@
 #' @examples
 #' hdp_example <- hdp_init(c(0, 1, 1), c(1, 2, 2), rep(1, 6), rep(2, 2), rep(0.5, 2))
 #' hdp_example <- hdp_addconparam(hdp_example, rep(1, 2), rep(1, 2))
-
-hdp_addconparam <- function(hdp, alphaa, alphab){
-  #input checks
+hdp_addconparam <- function(hdp, alphaa, alphab) {
+  # input checks
   if (!is(hdp, "hdpState")) stop("hdp must have class hdpState")
   if (!validObject(hdp)) stop("input hdp is not a valid hdpState object")
   if (any(alphaa <= 0) | any(alphab <= 0)) {
@@ -41,13 +40,14 @@ hdp_addconparam <- function(hdp, alphaa, alphab){
     a <- alphaa[cp]
     b <- alphab[cp]
     numdpcp <- 0L
-    hdp@conparam[[old_numcp+cp]] <- new("hdpConparam",
-                              alphaa  = a,
-                              alphab  = b,
-                              numdp   = numdpcp,
-                              alpha   = a / b,
-                              totalnd = as.integer(rep(0, numdpcp)),
-                              totalnt = as.integer(rep(0, numdpcp)))
+    hdp@conparam[[old_numcp + cp]] <- new("hdpConparam",
+      alphaa  = a,
+      alphab  = b,
+      numdp   = numdpcp,
+      alpha   = a / b,
+      totalnd = as.integer(rep(0, numdpcp)),
+      totalnt = as.integer(rep(0, numdpcp))
+    )
   }
 
   # check validity and return
