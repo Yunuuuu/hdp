@@ -35,7 +35,8 @@ Suggests:
     knitr,
     rmarkdown,
     BiocStyle,
-    devtools
+    devtools,
+    lintr
 Collate:
     'aaa-classes-input.R'
     'aaa-classes-output.R'
@@ -64,3 +65,4 @@ Collate:
     'zzz.R'
 VignetteBuilder: knitr
 RoxygenNote: 7.2.3
+Encoding: UTF-8

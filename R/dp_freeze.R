@@ -15,22 +15,21 @@
 #' @export
 dp_freeze <- function(hdp, dpindex) {
   # input checks
-  if (!is(hdp, "hdpState")) stop("hdp must have class hdpState")
-  if (!validObject(hdp)) stop("input hdp is not a valid hdpState object")
-  if (any(dpindex < 1) |
-    any(dpindex > hdp@numdp) |
-    any(dpindex %% 1 != 0) |
-    any(duplicated(dpindex))) {
-    stop("dpindex must be positive integers no greater than
-         numdp(hdp) with no duplicates")
-  }
+  assert_class(hdp, function(x) {
+    is(x, "hdpState") && validObject(x)
+  }, msg = "{.cls hdpState} object")
+  assert_class(dpindex, function(x) {
+    all(x > 0L) && is_round_integer(x) &&
+      !anyDuplicated(dpindex) &&
+      all(x <= hdp@numdp)
+  }, msg = "positive integers no greater than {.code numdp(hdp)} with no duplicates")
 
   ACTIVE <- 2L
   FROZEN <- 1L
 
   dpindex <- sort(dpindex)
 
-  for (kk in 1:length(dpindex)) {
+  for (kk in seq_along(dpindex)) {
     jj <- dpindex[kk]
     if (hdp@dpstate[jj] != ACTIVE) {
       stop("Can only freeze a DP that is activated")

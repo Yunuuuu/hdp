@@ -29,30 +29,43 @@
 #' hdp_example
 hdp_adddp <- function(hdp, numdp, ppindex, cpindex) {
   # input checks
-  if (!is(hdp, "hdpState")) stop("hdp must have class hdpState")
-  if (!validObject(hdp)) stop("input hdp is not a valid hdpState object")
-  if (numdp < 1 | numdp %% 1 != 0) stop("numdp must be positive integer")
-  # adjust length of ppindex and cpindex if single integer
-  if (length(ppindex) == 1 & numdp > 1) ppindex <- rep(ppindex, numdp)
-  if (length(cpindex) == 1 & numdp > 1) cpindex <- rep(cpindex, numdp)
-  if (length(ppindex) != numdp | length(cpindex) != numdp) {
-    stop("ppindex and cpindex must be either a single integer,
-         or have length equal to numdp")
-  }
-  if (any(ppindex < 0) |
-    any(ppindex %% 1 != 0) |
-    any(ppindex >= (hdp@numdp + 1):(hdp@numdp + numdp))) {
-    stop("ppindex must be non-negative integer/s,
-         referring to a parent of smaller index")
-  }
-  if (any(cpindex < 1) |
-    any(cpindex %% 1 != 0) |
-    any(cpindex > hdp@numconparam) |
-    length(cpindex) != length(ppindex)) {
-    stop("cpindex must be positive integer/s, no greater than the number of
-         concentration parameters, and same length as ppindex")
-  }
+  assert_class(hdp, function(x) {
+    is(x, "hdpState") && validObject(x)
+  }, msg = "{.cls hdpState} object")
+  assert_class(numdp, function(x) {
+    all(x > 0L) &&
+      is_scalar(x) &&
+      is_round_integer(x)
+  }, msg = "scalar positive integer")
+  assert_class(
+    ppindex, function(x) {
+      all(x > 0L) &&
+        is_round_integer(x) &&
+        (is_scalar(x) || length(x) == numdp) &&
+        all(x < (hdp@numdp + 1L):(hdp@numdp + numdp))
+    },
+    msg = sprintf(
+      "positive integer (length {.val 1L} or {.arg numdp} ({.val %d}) ) referring to a parent of smaller index", # nolint
+      numdp
+    )
+  )
+  numconparam <- hdp@numconparam
+  assert_class(
+    cpindex, function(x) {
+      all(x > 0L) &&
+        is_round_integer(x) &&
+        (is_scalar(x) || length(x) == numdp) &&
+        all(x <= numconparam)
+    },
+    msg = sprintf(
+      "positive integer (length {.val 1L} or {.arg numdp} ({.val %d}) ), no greater than the number of {.arg hdp} concentration ({.val %d}) parameters", # nolint
+      numdp, numconparam
+    )
+  )
 
+  # adjust length of ppindex and cpindex if single integer
+  if (length(ppindex) == 1L && numdp > 1L) ppindex <- rep_len(ppindex, numdp)
+  if (length(cpindex) == 1L && numdp > 1L) cpindex <- rep_len(cpindex, numdp)
 
   HELDOUT <- 0L
 
@@ -60,11 +73,11 @@ hdp_adddp <- function(hdp, numdp, ppindex, cpindex) {
   dpindex <- hdp@numdp + 1:numdp
   hdp@numdp <- hdp@numdp + as.integer(numdp)
   hdp@dp <- c(hdp@dp, vector("list", numdp))
-  for (ii in 1:numdp) {
+  for (ii in seq_len(numdp)) {
     jj <- dpindex[ii]
     pp <- ppindex[ii]
     cp <- cpindex[ii]
-    tt <- hdp@conparam[[cp]]@numdp + 1
+    tt <- hdp@conparam[[cp]]@numdp + 1L
     hdp@dpstate[jj] <- HELDOUT
     hdp@ppindex[jj] <- as.integer(pp)
     hdp@cpindex[jj] <- as.integer(cp)
@@ -76,7 +89,7 @@ hdp_adddp <- function(hdp, numdp, ppindex, cpindex) {
       datacc  = vector("integer"),
       classnd = 0L,
       classnt = 0L,
-      beta    = 1,
+      beta    = 1L,
       alpha   = vector("numeric"),
       numdata = 0L,
       datass  = vector("integer")

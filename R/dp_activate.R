@@ -25,17 +25,26 @@
 #' my_hdp <- dp_activate(my_hdp, 1:13, 2)
 dp_activate <- function(hdp, dpindex, initcc, seed = sample(1:10^7, 1)) {
   # input checks
-  if (!is(hdp, "hdpState")) stop("hdp must have class hdpState")
-  if (!validObject(hdp)) stop("input hdp is not a valid hdpState object")
-  if (any(dpindex < 1) |
-    any(dpindex > hdp@numdp) |
-    any(dpindex %% 1 != 0) |
-    any(duplicated(dpindex))) {
-    stop("dpindex must be positive integers no greater than
-         numdp(hdp) with no duplicates")
-  }
-  if (initcc < 1 | initcc %% 1 != 0) stop("initcc must be a positive integer")
-  if (seed %% 1 != 0) stop("seed must be an integer")
+  assert_class(hdp, function(x) {
+    is(x, "hdpState") && validObject(x)
+  }, msg = "{.cls hdpState} object")
+
+  assert_class(dpindex, function(x) {
+    all(x > 0L) && is_round_integer(x) &&
+      !anyDuplicated(dpindex) &&
+      all(x <= hdp@numdp)
+  }, msg = "positive integers no greater than {.code numdp(hdp)} with no duplicates")
+
+  assert_class(initcc, function(x) {
+    all(x > 0L) &&
+      is_scalar(x) &&
+      is_round_integer(x)
+  }, msg = "scalar positive integer")
+
+  assert_class(seed, function(x) {
+    is_scalar(x) &&
+      is_round_integer(x)
+  }, msg = "scalar integer")
 
   # set seed
   set.seed(seed, kind = "Mersenne-Twister", normal.kind = "Inversion")
@@ -52,7 +61,7 @@ dp_activate <- function(hdp, dpindex, initcc, seed = sample(1:10^7, 1)) {
 
   dpindex <- sort(dpindex)
   # initialize state of HDP
-  for (kk in 1:length(dpindex)) {
+  for (kk in seq_along(dpindex)) {
     jj <- dpindex[kk]
     pp <- hdp@ppindex[jj]
     cp <- hdp@cpindex[jj]
@@ -61,7 +70,7 @@ dp_activate <- function(hdp, dpindex, initcc, seed = sample(1:10^7, 1)) {
     if (hdp@dpstate[jj] == ACTIVE) {
       stop("Trying to activate a DP that is already activated")
     }
-    if (pp > 0) {
+    if (pp > 0L) {
       if (hdp@dpstate[pp] != ACTIVE) {
         stop("Ancestors of to be activated DPs has to be already activated")
       }
@@ -75,13 +84,14 @@ dp_activate <- function(hdp, dpindex, initcc, seed = sample(1:10^7, 1)) {
         hdp@dp[[jj]]@datass
       )
       hdp@dp[[jj]]@classnd <- tabulate(hdp@dp[[jj]]@datacc,
-        nbins = hdp@base@numclass + 1
+        nbins = hdp@base@numclass + 1L
       )
       hdp@dp[[jj]]@classnt <- 0L
     }
 
-    if (pp == 0) {
-      hdp@dp[[jj]]@beta <- rep(1, hdp@base@numclass + 1) / (hdp@base@numclass + 1)
+    if (pp == 0L) {
+      hdp@dp[[jj]]@beta <- rep(1L, hdp@base@numclass + 1L) /
+        (hdp@base@numclass + 1L)
     } else {
       hdp@dp[[jj]]@beta <- hdp@dp[[pp]]@beta
     }
@@ -89,15 +99,15 @@ dp_activate <- function(hdp, dpindex, initcc, seed = sample(1:10^7, 1)) {
     hdp@dpstate[jj] <- ACTIVE
   }
 
-  for (kk in length(dpindex):1) {
+  for (kk in rev(seq_along(dpindex))) {
     jj <- dpindex[kk]
     pp <- hdp@ppindex[jj]
     cp <- hdp@cpindex[jj]
     tt <- hdp@ttindex[jj]
     alpha <- hdp@dp[[jj]]@alpha
 
-    if (pp == 0) {
-      hdp@dp[[jj]]@classnt <- as.integer(hdp@dp[[jj]]@classnd > 0)
+    if (pp == 0L) {
+      hdp@dp[[jj]]@classnt <- as.integer(hdp@dp[[jj]]@classnd > 0L)
     } else {
       hdp@dp[[pp]]@classnd <- as.integer(hdp@dp[[pp]]@classnd -
         hdp@dp[[jj]]@classnt)

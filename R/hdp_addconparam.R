@@ -19,13 +19,14 @@
 #' hdp_example <- hdp_addconparam(hdp_example, rep(1, 2), rep(1, 2))
 hdp_addconparam <- function(hdp, alphaa, alphab) {
   # input checks
-  if (!is(hdp, "hdpState")) stop("hdp must have class hdpState")
-  if (!validObject(hdp)) stop("input hdp is not a valid hdpState object")
-  if (any(alphaa <= 0) | any(alphab <= 0)) {
-    stop("alphaa and alphab must be positive")
+  assert_class(hdp, function(x) {
+    is(x, "hdpState") && validObject(x)
+  }, msg = "{.cls hdpState} object")
+  if (any(alphaa <= 0) || any(alphab <= 0)) {
+    cli::cli_abort("{.arg alphaa} and {.arg alphab} must be positive")
   }
   if (length(alphaa) != length(alphab)) {
-    stop("alphaa and alphab must have the same length")
+    cli::cli_abort("{.arg alphaa} and {.arg alphab} must have the same length")
   }
 
   # add new concentration parameters in
@@ -36,7 +37,7 @@ hdp_addconparam <- function(hdp, alphaa, alphab) {
   hdp@conparam <- c(hdp@conparam, vector("list", new_numcp))
 
   # fill in conparam list
-  for (cp in 1:new_numcp) {
+  for (cp in seq_len(new_numcp)) {
     a <- alphaa[cp]
     b <- alphab[cp]
     numdpcp <- 0L
@@ -45,8 +46,8 @@ hdp_addconparam <- function(hdp, alphaa, alphab) {
       alphab  = b,
       numdp   = numdpcp,
       alpha   = a / b,
-      totalnd = as.integer(rep(0, numdpcp)),
-      totalnt = as.integer(rep(0, numdpcp))
+      totalnd = as.integer(rep(0L, numdpcp)),
+      totalnt = as.integer(rep(0L, numdpcp))
     )
   }
 
