@@ -5,5 +5,5 @@ src/*.o
 src/*.so
 src/*.dll
 hdp.Rproj
-.radian_hitory
 Scratch.RConsole
+.radian_history
