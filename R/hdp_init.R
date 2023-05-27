@@ -53,6 +53,7 @@ hdp_init <- function(ppindex, cpindex, hh, alphaa, alphab) {
          the length of alphaa and alphab, and same length as ppindex")
   }
   if (any(hh <= 0)) stop("hh must be a positive vector")
+  hh <- as.numeric(hh)
   if (any(alphaa <= 0) | any(alphab <= 0)) {
     stop("alphaa and alphab must be positive")
   }

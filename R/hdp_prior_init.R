@@ -60,7 +60,7 @@ hdp_prior_init <- function(prior_distn, prior_pseudoc, hh, alphaa, alphab) {
   hdp <- hdp_init(
     ppindex = c(0, rep(1, nsig)),
     cpindex = c(1, rep(2, nsig)),
-    hh = as.numeric(hh),
+    hh = hh,
     alphaa = alphaa,
     alphab = alphab
   )
