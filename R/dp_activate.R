@@ -47,6 +47,12 @@ dp_activate <- function(hdp, dpindex, initcc, seed = sample(1:10^7, 1)) {
   }, msg = "scalar integer")
 
   # set seed
+  oldseed <- get0(".Random.seed", envir = .GlobalEnv)
+  if (is.null(oldseed)) {
+    on.exit(rm(".Random.seed", envir = .GlobalEnv))
+  } else {
+    on.exit(assign(".Random.seed", value = oldseed, envir = .GlobalEnv))
+  }
   set.seed(seed, kind = "Mersenne-Twister", normal.kind = "Inversion")
   hdp@seed_activate <- as.integer(seed)
   hdp@initcc <- as.integer(initcc)

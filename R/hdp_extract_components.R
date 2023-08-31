@@ -36,6 +36,12 @@ hdp_extract_components <- function(x, cos.merge = 0.90, min.sample = 1) {
     stop("min.sample must be a positive integer")
   }
 
+  oldseed <- get0(".Random.seed", envir = .GlobalEnv)
+  if (is.null(oldseed)) {
+    on.exit(rm(".Random.seed", envir = .GlobalEnv))
+  } else {
+    on.exit(assign(".Random.seed", value = oldseed, envir = .GlobalEnv))
+  }
 
   if (is_multi) {
     # list of hdpSampleChain objects

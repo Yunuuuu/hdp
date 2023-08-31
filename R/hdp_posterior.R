@@ -49,9 +49,13 @@ hdp_posterior <- function(hdp, burnin, n, space, cpiter = 1,
   if (seed %% 1 != 0) stop("seed must be an integer")
 
   # set seed
+  oldseed <- get0(".Random.seed", envir = .GlobalEnv)
+  if (is.null(oldseed)) {
+    on.exit(rm(".Random.seed", envir = .GlobalEnv))
+  } else {
+    on.exit(assign(".Random.seed", value = oldseed, envir = .GlobalEnv))
+  }
   set.seed(seed, kind = "Mersenne-Twister", normal.kind = "Inversion")
-
-
 
   # function to return difference in time in minute units
   mindifftime <- function(t1, t2) {
